@@ -3,28 +3,31 @@ const { Parser } = require("../Parser");
 
 const parser = new Parser();
 
-describe("Statements", () => {
-  test("multiple statements", () => {
-    expect(
-      parser.parse(`
-        42;
-        "Hello";
-      `)
-    ).toStrictEqual({
+describe("Literals", () => {
+  test("number", () => {
+    expect(parser.parse(`42;`)).toStrictEqual({
       type: "Program",
       body: [
         {
           type: "ExpressionStatement",
           expression: {
             type: "NumericLiteral",
-            value: "42",
+            value: 42,
           },
         },
+      ],
+    });
+  });
+
+  test("string", () => {
+    expect(parser.parse(`"42";`)).toStrictEqual({
+      type: "Program",
+      body: [
         {
           type: "ExpressionStatement",
           expression: {
             type: "StringLiteral",
-            value: `"Hello"`,
+            value: "42",
           },
         },
       ],

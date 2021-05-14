@@ -13,6 +13,12 @@ const source = `
   // Number
 
   52;
+
+  {
+    "hello world";
+
+    500;
+  }
 `;
 
 const ast = parser.parse(source);

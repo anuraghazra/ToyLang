@@ -1,4 +1,7 @@
+const { DefaultASTFactory } = require("./ASTFactories");
 const { Tokenizer } = require("./Tokenizer");
+
+const factory = DefaultASTFactory;
 
 class Parser {
   constructor() {
@@ -17,31 +20,51 @@ class Parser {
   }
 
   Program() {
-    return { type: "Program", body: this.StatementList() };
+    return factory.Program(this.StatementList());
   }
 
-  StatementList() {
-    this.statementList = [this.Statement()];
+  StatementList(stopLookhead = null) {
+    const statementList = [this.Statement()];
 
-    while (this._lookahead !== null) {
-      this.statementList.push(this.Statement());
+    while (this._lookahead !== null && this._lookahead.type !== stopLookhead) {
+      statementList.push(this.Statement());
     }
 
-    return this.statementList;
+    return statementList;
   }
 
   Statement() {
-    return this.ExpressionStatement();
+    switch (this._lookahead.type) {
+      case ";":
+        return this.EmptyStatement();
+      case "{":
+        return this.BlockStatement();
+      default:
+        return this.ExpressionStatement();
+    }
+  }
+
+  EmptyStatement() {
+    this._eat(";");
+    return factory.EmptyStatement();
+  }
+
+  // { OptStatementList }
+  BlockStatement() {
+    this._eat("{");
+
+    const body = this._lookahead.type !== "}" ? this.StatementList("}") : [];
+
+    this._eat("}");
+
+    return factory.BlockStatement(body);
   }
 
   ExpressionStatement() {
     const expression = this.Expression();
     this._eat(";");
 
-    return {
-      type: "ExpressionStatement",
-      expression,
-    };
+    return factory.ExpressionStatement(expression);
   }
 
   Expression() {
@@ -61,18 +84,13 @@ class Parser {
 
   NumericLiteral() {
     const token = this._eat("NUMBER");
-    return {
-      type: "NumericLiteral",
-      value: Number(token.value),
-    };
+
+    return factory.NumericLiteral(Number(token.value));
   }
 
   StringLiteral() {
     const token = this._eat("STRING");
-    return {
-      type: "StringLiteral",
-      value: token.value.slice(1, -1),
-    };
+    return factory.StringLiteral(token.value.slice(1, -1));
   }
 
   _eat(tokenType) {
