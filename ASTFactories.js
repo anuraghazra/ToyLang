@@ -17,6 +17,18 @@ const DefaultASTFactory = {
       expression,
     };
   },
+  NullLiteral() {
+    return {
+      type: "NullLiteral",
+      value: null,
+    };
+  },
+  BooleanLiteral(value) {
+    return {
+      type: "BooleanLiteral",
+      value: value,
+    };
+  },
   StringLiteral(value) {
     return {
       type: "StringLiteral",

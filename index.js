@@ -2,8 +2,8 @@ const { Parser } = require("./Parser");
 
 const parser = new Parser();
 
-const source = ` 
-x + 5 > 3;
+const source = `
+  false == true;
 `;
 
 const ast = parser.parse(source);

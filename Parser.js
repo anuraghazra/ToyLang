@@ -146,7 +146,7 @@ class Parser {
 
   // LefthandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
   AssignmentExpression() {
-    let left = this.RelationalExpression();
+    let left = this.EqualityExpression();
 
     if (!this._isAssignmentOperator(this._lookahead?.type)) {
       return left;
@@ -187,6 +187,10 @@ class Parser {
 
   _isAssignmentOperator(type) {
     return type === "SIMPLE_ASSIGNMENT" || type === "COMPLEX_ASSIGNMENT";
+  }
+
+  EqualityExpression() {
+    return this._BinaryExpression("RelationalExpression", "EQUALITY_OPERATOR");
   }
 
   // RelationalExpression
@@ -243,7 +247,7 @@ class Parser {
   }
 
   _isLiteral(tokenType) {
-    return tokenType === "NUMBER" || tokenType === "STRING";
+    return ["NUMBER", "STRING", "true", "false", "null"].includes(tokenType);
   }
 
   // ( Expression )
@@ -263,9 +267,26 @@ class Parser {
         return this.NumericLiteral();
       case "STRING":
         return this.StringLiteral();
+      case "true":
+        return this.BooleanLiteral(true);
+      case "false":
+        return this.BooleanLiteral(false);
+      case "null":
+        return this.NullLiteral(false);
     }
 
     throw new SyntaxError("Literal: Unexpected literal");
+  }
+
+  NullLiteral() {
+    this._eat("null");
+    return factory.NullLiteral();
+  }
+
+  BooleanLiteral(value) {
+    this._eat(value ? "true" : "false");
+
+    return factory.BooleanLiteral(value);
   }
 
   NumericLiteral() {
