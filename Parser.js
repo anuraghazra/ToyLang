@@ -26,7 +26,7 @@ class Parser {
   StatementList(stopLookhead = null) {
     const statementList = [this.Statement()];
 
-    while (this._lookahead !== null && this._lookahead.type !== stopLookhead) {
+    while (this._lookahead !== null && this._lookahead?.type !== stopLookhead) {
       statementList.push(this.Statement());
     }
 
@@ -34,7 +34,9 @@ class Parser {
   }
 
   Statement() {
-    switch (this._lookahead.type) {
+    switch (this._lookahead?.type) {
+      case "let":
+        return this.VariableStatement();
       case ";":
         return this.EmptyStatement();
       case "{":
@@ -42,6 +44,52 @@ class Parser {
       default:
         return this.ExpressionStatement();
     }
+  }
+
+  // let VariableDeclarationList ';'
+  VariableStatement() {
+    this._eat("let");
+
+    const declarations = this.VariableDeclarationList();
+
+    this._eat(";");
+
+    return {
+      type: "VariableStatement",
+      declarations,
+    };
+  }
+
+  VariableDeclarationList() {
+    const declarations = [];
+
+    do {
+      declarations.push(this.VariableDeclaration());
+    } while (this._lookahead?.type === "," && this._eat(","));
+
+    return declarations;
+  }
+
+  // Identifier OptVariableInitializer
+  VariableDeclaration() {
+    const id = this.Identifier();
+    const init =
+      this._lookahead?.type !== ";" && this._lookahead?.type !== ","
+        ? this.VariableInitializer()
+        : null;
+
+    return {
+      type: "VariableDeclaration",
+      id,
+      init,
+    };
+  }
+
+  // SIMPLE_ASSIGNMENT AssignmentExpression
+  VariableInitializer() {
+    this._eat("SIMPLE_ASSIGNMENT");
+
+    return this.AssignmentExpression();
   }
 
   EmptyStatement() {
@@ -53,7 +101,7 @@ class Parser {
   BlockStatement() {
     this._eat("{");
 
-    const body = this._lookahead.type !== "}" ? this.StatementList("}") : [];
+    const body = this._lookahead?.type !== "}" ? this.StatementList("}") : [];
 
     this._eat("}");
 
@@ -106,7 +154,7 @@ class Parser {
   }
 
   AssignmentOperator() {
-    if (this._lookahead.type === "SIMPLE_ASSIGNMENT") {
+    if (this._lookahead?.type === "SIMPLE_ASSIGNMENT") {
       return this._eat("SIMPLE_ASSIGNMENT");
     }
     return this._eat("COMPLEX_ASSIGNMENT");
@@ -152,10 +200,10 @@ class Parser {
   }
 
   PrimaryExpression() {
-    if (this._isLiteral(this._lookahead.type)) {
+    if (this._isLiteral(this._lookahead?.type)) {
       return this.Literal();
     }
-    switch (this._lookahead.type) {
+    switch (this._lookahead?.type) {
       case "(":
         return this.ParenthesizedExpression();
       default:
@@ -179,7 +227,7 @@ class Parser {
   }
 
   Literal() {
-    switch (this._lookahead.type) {
+    switch (this._lookahead?.type) {
       case "NUMBER":
         return this.NumericLiteral();
       case "STRING":
