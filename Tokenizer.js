@@ -30,6 +30,9 @@ const spec = [
   [/^[\+\-]/, "ADITITIVE_OPERATOR"],
   [/^[*\/]/, "MULTIPLICATIVE_OPERATOR"],
 
+  // relational operators
+  [/^[><]=?/, "RELATIONAL_OPERATOR"],
+
   // Strings
   [/^"[^"]*"/, "STRING"],
   [/^'[^']*'/, "STRING"],

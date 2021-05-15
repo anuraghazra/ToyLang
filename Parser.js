@@ -146,7 +146,7 @@ class Parser {
 
   // LefthandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
   AssignmentExpression() {
-    let left = this.AdditiveExpression();
+    let left = this.RelationalExpression();
 
     if (!this._isAssignmentOperator(this._lookahead?.type)) {
       return left;
@@ -187,6 +187,12 @@ class Parser {
 
   _isAssignmentOperator(type) {
     return type === "SIMPLE_ASSIGNMENT" || type === "COMPLEX_ASSIGNMENT";
+  }
+
+  // RelationalExpression
+  // AdditiveExpression RELATIONAL_OPERATOR
+  RelationalExpression() {
+    return this._BinaryExpression("AdditiveExpression", "RELATIONAL_OPERATOR");
   }
 
   // MultiplicativeExpression ADITITIVE_OPERATOR MultiplicativeExpression
