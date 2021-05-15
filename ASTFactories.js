@@ -25,6 +25,29 @@ const DefaultASTFactory = {
       alternate,
     };
   },
+  WhileStatement(test, body) {
+    return {
+      type: "WhileStatement",
+      test,
+      body,
+    };
+  },
+  DoWhileStatement(test, body) {
+    return {
+      type: "DoWhileStatement",
+      test,
+      body,
+    };
+  },
+  ForStatement(init, test, update, body) {
+    return {
+      type: "ForStatement",
+      test,
+      init,
+      update,
+      body,
+    };
+  },
   VariableStatement(declarations) {
     return {
       type: "VariableStatement",

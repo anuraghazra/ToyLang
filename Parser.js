@@ -39,6 +39,10 @@ class Parser {
         return this.VariableStatement();
       case "if":
         return this.IfStatement();
+      case "do":
+      case "while":
+      case "for":
+        return this.IterationStatement();
       case ";":
         return this.EmptyStatement();
       case "{":
@@ -46,6 +50,67 @@ class Parser {
       default:
         return this.ExpressionStatement();
     }
+  }
+
+  IterationStatement() {
+    switch (this._lookahead.type) {
+      case "while":
+        return this.WhileStatement();
+      case "do":
+        return this.DoWhileStatement();
+      case "for":
+        return this.ForStatement();
+    }
+  }
+
+  // `while` `(` expression `)` Statement
+  WhileStatement() {
+    this._eat("while");
+    this._eat("(");
+    const test = this.Expression();
+    this._eat(")");
+    const body = this.Statement();
+
+    return factory.WhileStatement(test, body);
+  }
+
+  // `do` Statement `while` `(` expression `)`
+  DoWhileStatement() {
+    this._eat("do");
+    const body = this.Statement();
+    this._eat("while");
+    this._eat("(");
+    const test = this.Expression();
+    this._eat(")");
+    this._eat(";");
+
+    return factory.DoWhileStatement(test, body);
+  }
+
+  // for `(` Statement `;` Statement `;` Statement `)` Statement
+  ForStatement() {
+    this._eat("for");
+    this._eat("(");
+
+    const init = this._lookahead?.type !== ";" ? this.ForStatementInit() : null;
+    this._eat(";");
+
+    const test = this._lookahead?.type !== ";" ? this.Expression() : null;
+    this._eat(";");
+
+    const update = this._lookahead?.type !== ")" ? this.Expression() : null;
+    this._eat(")");
+
+    const body = this.Statement();
+
+    return factory.ForStatement(init, test, update, body);
+  }
+
+  ForStatementInit() {
+    if (this._lookahead?.type === "let") {
+      return this.VariableStatementInit();
+    }
+    return this.Expression();
   }
 
   // `if` `(` Expression `)` Statement
@@ -66,15 +131,18 @@ class Parser {
     return factory.IfStatement(expression, statement, alternate);
   }
 
+  // let VariableDeclarationList
+  VariableStatementInit() {
+    this._eat("let");
+    const declarations = this.VariableDeclarationList();
+    return factory.VariableStatement(declarations);
+  }
+
   // let VariableDeclarationList ';'
   VariableStatement() {
-    this._eat("let");
-
-    const declarations = this.VariableDeclarationList();
-
+    const varStatement = this.VariableStatementInit();
     this._eat(";");
-
-    return factory.VariableStatement(declarations);
+    return varStatement;
   }
 
   VariableDeclarationList() {
