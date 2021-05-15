@@ -5,9 +5,13 @@ const spec = [
   [/^;/, ";"],
   [/^\}/, "}"],
   [/^\{/, "{"],
+  [/^\(/, "("],
+  [/^\)/, ")"],
   [/^\d+/, "NUMBER"],
   [/^"[^"]*"/, "STRING"],
   [/^'[^']*'/, "STRING"],
+  [/^[\+\-]/, "ADITITIVE_OPERATOR"],
+  [/^[*\/]/, "MULTIPLICATIVE_OPERATOR"],
 ];
 
 class Tokenizer {
