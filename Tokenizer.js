@@ -33,7 +33,7 @@ const spec = [
   [/^[\*\/\+\-]=/, "COMPLEX_ASSIGNMENT"],
 
   // Math operators
-  [/^[\+\-]/, "ADITITIVE_OPERATOR"],
+  [/^[\+\-]/, "ADDITITIVE_OPERATOR"],
   [/^[*\/]/, "MULTIPLICATIVE_OPERATOR"],
 
   // relational operators
@@ -42,6 +42,7 @@ const spec = [
   // logical operators
   [/^&&/, "LOGICAL_AND"],
   [/^\|\|/, "LOGICAL_OR"],
+  [/^!/, "LOGICAL_NOT"],
 
   // Strings
   [/^"[^"]*"/, "STRING"],

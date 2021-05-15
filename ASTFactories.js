@@ -17,6 +17,38 @@ const DefaultASTFactory = {
       expression,
     };
   },
+  IfStatement(test, consequent, alternate) {
+    return {
+      type: "IfStatement",
+      test,
+      consequent,
+      alternate,
+    };
+  },
+  VariableStatement(declarations) {
+    return {
+      type: "VariableStatement",
+      declarations,
+    };
+  },
+  VariableDeclaration(id, init) {
+    return {
+      type: "VariableDeclaration",
+      id,
+      init,
+    };
+  },
+  AssignmentExpression({ operator, left, right }) {
+    return {
+      type: "AssignmentExpression",
+      operator,
+      left,
+      right,
+    };
+  },
+  Identifier(name) {
+    return { type: "Identifier", name };
+  },
   NullLiteral() {
     return {
       type: "NullLiteral",

@@ -63,12 +63,7 @@ class Parser {
       alternate = this.Statement();
     }
 
-    return {
-      type: "IfStatement",
-      test: expression,
-      consequent: statement,
-      alternate,
-    };
+    return factory.IfStatement(expression, statement, alternate);
   }
 
   // let VariableDeclarationList ';'
@@ -79,10 +74,7 @@ class Parser {
 
     this._eat(";");
 
-    return {
-      type: "VariableStatement",
-      declarations,
-    };
+    return factory.VariableStatement(declarations);
   }
 
   VariableDeclarationList() {
@@ -103,11 +95,7 @@ class Parser {
         ? this.VariableInitializer()
         : null;
 
-    return {
-      type: "VariableDeclaration",
-      id,
-      init,
-    };
+    return factory.VariableDeclaration(id, init);
   }
 
   // SIMPLE_ASSIGNMENT AssignmentExpression
@@ -120,6 +108,11 @@ class Parser {
   EmptyStatement() {
     this._eat(";");
     return factory.EmptyStatement();
+  }
+
+  Identifier() {
+    let name = this._eat("IDENTIFIER").value;
+    return factory.Identifier(name);
   }
 
   // { OptStatementList }
@@ -152,21 +145,61 @@ class Parser {
       return left;
     }
 
-    return {
-      type: "AssignmentExpression",
+    return factory.AssignmentExpression({
       operator: this.AssignmentOperator().value,
       left: this._checkValidAssignmentTarget(left),
       right: this.AssignmentExpression(),
-    };
+    });
+  }
+
+  UnaryExpression() {
+    let operator;
+
+    switch (this._lookahead.type) {
+      case "ADDITITIVE_OPERATOR":
+        operator = this._eat("ADDITITIVE_OPERATOR").value;
+        break;
+      case "LOGICAL_NOT":
+        operator = this._eat("LOGICAL_NOT").value;
+        break;
+    }
+
+    if (operator) {
+      return {
+        type: "UnaryExpression",
+        operator,
+        argument: this.UnaryExpression(),
+      };
+    }
+
+    return this.LeftHandSideExpression();
   }
 
   LeftHandSideExpression() {
-    return this.Identifier();
+    return this.PrimaryExpression();
   }
 
-  Identifier() {
-    let name = this._eat("IDENTIFIER").value;
-    return { type: "Identifier", name };
+  PrimaryExpression() {
+    if (this._isLiteral(this._lookahead?.type)) {
+      return this.Literal();
+    }
+    switch (this._lookahead?.type) {
+      case "(":
+        return this.ParenthesizedExpression();
+      case "IDENTIFIER":
+        return this.Identifier();
+      default:
+        return this.LeftHandSideExpression();
+    }
+  }
+
+  // ( Expression )
+  ParenthesizedExpression() {
+    this._eat("(");
+    const expression = this.Expression();
+    this._eat(")");
+
+    return expression;
   }
 
   _checkValidAssignmentTarget(node) {
@@ -199,20 +232,17 @@ class Parser {
     return this._BinaryExpression("AdditiveExpression", "RELATIONAL_OPERATOR");
   }
 
-  // MultiplicativeExpression ADITITIVE_OPERATOR MultiplicativeExpression
+  // MultiplicativeExpression ADDITITIVE_OPERATOR MultiplicativeExpression
   AdditiveExpression() {
     return this._BinaryExpression(
       "MultiplicativeExpression",
-      "ADITITIVE_OPERATOR"
+      "ADDITITIVE_OPERATOR"
     );
   }
 
-  // PrimaryExpression MULTIPLICATIVE_OPERATOR PrimaryExpression
+  // UnaryExpression MULTIPLICATIVE_OPERATOR UnaryExpression
   MultiplicativeExpression() {
-    return this._BinaryExpression(
-      "PrimaryExpression",
-      "MULTIPLICATIVE_OPERATOR"
-    );
+    return this._BinaryExpression("UnaryExpression", "MULTIPLICATIVE_OPERATOR");
   }
 
   LogicalANDExpression() {
@@ -261,31 +291,9 @@ class Parser {
     return left;
   }
 
-  PrimaryExpression() {
-    if (this._isLiteral(this._lookahead?.type)) {
-      return this.Literal();
-    }
-    switch (this._lookahead?.type) {
-      case "(":
-        return this.ParenthesizedExpression();
-      default:
-        return this.LeftHandSideExpression();
-    }
-  }
-
+  // ----------------- Literals
   _isLiteral(tokenType) {
     return ["NUMBER", "STRING", "true", "false", "null"].includes(tokenType);
-  }
-
-  // ( Expression )
-  ParenthesizedExpression() {
-    this._eat("(");
-
-    let expression = this.Expression();
-
-    this._eat(")");
-
-    return expression;
   }
 
   Literal() {
