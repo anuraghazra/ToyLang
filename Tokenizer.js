@@ -26,6 +26,11 @@ const spec = [
   [/^\bnull\b/, "null"],
   [/^\bdef\b/, "def"],
   [/^\breturn\b/, "return"],
+  [/^\bclass\b/, "class"],
+  [/^\bnew\b/, "new"],
+  [/^\bthis\b/, "this"],
+  [/^\bsuper\b/, "super"],
+  [/^\bextends\b/, "extends"],
 
   // Numbers
   [/^\d+/, "NUMBER"],

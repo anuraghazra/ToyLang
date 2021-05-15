@@ -47,6 +47,8 @@ class Parser {
         return this.FunctionStatement();
       case "return":
         return this.ReturnStatement();
+      case "class":
+        return this.ClassDeclaration();
       case ";":
         return this.EmptyStatement();
       case "{":
@@ -54,6 +56,31 @@ class Parser {
       default:
         return this.ExpressionStatement();
     }
+  }
+
+  // `class` Identifier `extends` OptExtends: BlockStatement
+  ClassDeclaration() {
+    this._eat("class");
+
+    const id = this.Identifier();
+
+    const superClass =
+      this._lookahead?.type === "extends" ? this.ClassExtends() : null;
+
+    const body = this.BlockStatement();
+
+    return {
+      type: "ClassDeclaration",
+      superClass,
+      id,
+      body,
+    };
+  }
+
+  ClassExtends() {
+    this._eat("extends");
+
+    return this.Identifier();
   }
 
   // `def` Identifier `(` OptFunctionArguments `)` BlockStatement
@@ -296,6 +323,10 @@ class Parser {
   // | MemberExpression
   // | CallExpression
   CallMemberExpression() {
+    if (this._lookahead?.type === "super") {
+      return this._CallExpression(this.Super());
+    }
+
     const member = this.MemberExpression();
 
     if (this._lookahead?.type === "(") {
@@ -384,9 +415,38 @@ class Parser {
         return this.ParenthesizedExpression();
       case "IDENTIFIER":
         return this.Identifier();
+      case "this":
+        return this.ThisExpression();
+      case "new":
+        return this.NewExpression();
       default:
         return this.LeftHandSideExpression();
     }
+  }
+
+  NewExpression() {
+    this._eat("new");
+
+    return {
+      type: "NewExpression",
+      callee: this.MemberExpression(),
+      arguments: this.Arguments(),
+    };
+  }
+
+  ThisExpression() {
+    this._eat("this");
+    return {
+      type: "ThisExpression",
+    };
+  }
+
+  Super() {
+    this._eat("super");
+
+    return {
+      type: "Super",
+    };
   }
 
   // ( Expression )
