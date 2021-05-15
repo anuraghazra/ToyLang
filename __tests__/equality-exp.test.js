@@ -2,7 +2,7 @@ const { Parser } = require("../Parser");
 
 const parser = new Parser();
 
-describe("RelationalExpression", () => {
+describe("EqualityExpression", () => {
   test("x + 3 == true;", () => {
     expect(parser.parse(`x + 3 == true;`)).toStrictEqual({
       type: "Program",

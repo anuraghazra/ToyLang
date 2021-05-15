@@ -146,7 +146,7 @@ class Parser {
 
   // LefthandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
   AssignmentExpression() {
-    let left = this.EqualityExpression();
+    let left = this.LogicalORExpression();
 
     if (!this._isAssignmentOperator(this._lookahead?.type)) {
       return left;
@@ -215,6 +215,14 @@ class Parser {
     );
   }
 
+  LogicalANDExpression() {
+    return this._LogicalExpression("EqualityExpression", "LOGICAL_AND");
+  }
+
+  LogicalORExpression() {
+    return this._LogicalExpression("LogicalANDExpression", "LOGICAL_OR");
+  }
+
   _BinaryExpression(builderName, tokenType) {
     let left = this[builderName]();
 
@@ -225,6 +233,25 @@ class Parser {
 
       left = {
         type: "BinaryExpression",
+        operator,
+        left,
+        right,
+      };
+    }
+
+    return left;
+  }
+
+  _LogicalExpression(builderName, tokenType) {
+    let left = this[builderName]();
+
+    while (this._lookahead?.type === tokenType) {
+      const operator = this._eat(tokenType).value;
+
+      const right = this[builderName]();
+
+      left = {
+        type: "LogicalExpression",
         operator,
         left,
         right,
