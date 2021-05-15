@@ -37,6 +37,8 @@ class Parser {
     switch (this._lookahead?.type) {
       case "let":
         return this.VariableStatement();
+      case "if":
+        return this.IfStatement();
       case ";":
         return this.EmptyStatement();
       case "{":
@@ -44,6 +46,29 @@ class Parser {
       default:
         return this.ExpressionStatement();
     }
+  }
+
+  // `if` `(` Expression `)` Statement
+  // `if` `(` Expression `)` Statement `else` Statement
+  IfStatement() {
+    this._eat("if");
+    this._eat("(");
+    const expression = this.Expression();
+    this._eat(")");
+    const statement = this.Statement();
+
+    let alternate = null;
+    if (this._lookahead?.type === "else") {
+      this._eat("else");
+      alternate = this.Statement();
+    }
+
+    return {
+      type: "IfStatement",
+      test: expression,
+      consequent: statement,
+      alternate,
+    };
   }
 
   // let VariableDeclarationList ';'

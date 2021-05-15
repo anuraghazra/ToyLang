@@ -3,7 +3,9 @@ const { Parser } = require("./Parser");
 const parser = new Parser();
 
 const source = ` 
-  let foo = bar = 10;
+  if (x) {
+    x = 5;
+  }
 `;
 
 const ast = parser.parse(source);
