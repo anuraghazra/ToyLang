@@ -3,7 +3,7 @@ const { Parser } = require("./Parser");
 const parser = new Parser();
 
 const source = `
-  a.b.c["d"];
+  console.log(1);
 `;
 
 const ast = parser.parse(source);
