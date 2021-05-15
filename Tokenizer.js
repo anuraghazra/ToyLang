@@ -21,6 +21,8 @@ const spec = [
   [/^\btrue\b/, "true"],
   [/^\bfalse\b/, "false"],
   [/^\bnull\b/, "null"],
+  [/^\bdef\b/, "def"],
+  [/^\breturn\b/, "return"],
 
   // Numbers
   [/^\d+/, "NUMBER"],

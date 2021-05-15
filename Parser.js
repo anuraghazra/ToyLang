@@ -43,6 +43,10 @@ class Parser {
       case "while":
       case "for":
         return this.IterationStatement();
+      case "def":
+        return this.FunctionStatement();
+      case "return":
+        return this.ReturnStatement();
       case ";":
         return this.EmptyStatement();
       case "{":
@@ -52,8 +56,50 @@ class Parser {
     }
   }
 
+  // `def` Identifier `(` OptFunctionArguments `)` BlockStatement
+  FunctionStatement() {
+    this._eat("def");
+    const name = this.Identifier();
+    this._eat("(");
+
+    const params =
+      this._lookahead?.type === ")" ? [] : this.FunctionArguments();
+    this._eat(")");
+
+    const body = this.BlockStatement();
+
+    return {
+      type: "FunctionDeclaration",
+      name,
+      body,
+      params,
+    };
+  }
+
+  FunctionArguments() {
+    const params = [];
+
+    do {
+      params.push(this.Identifier());
+    } while (this._lookahead?.type === "," && this._eat(","));
+
+    return params;
+  }
+
+  ReturnStatement() {
+    this._eat("return");
+
+    const argument = this._lookahead?.type === ";" ? null : this.Expression();
+    this._eat(";");
+
+    return {
+      type: "ReturnStatement",
+      argument,
+    };
+  }
+
   IterationStatement() {
-    switch (this._lookahead.type) {
+    switch (this._lookahead?.type) {
       case "while":
         return this.WhileStatement();
       case "do":
@@ -223,7 +269,7 @@ class Parser {
   UnaryExpression() {
     let operator;
 
-    switch (this._lookahead.type) {
+    switch (this._lookahead?.type) {
       case "ADDITITIVE_OPERATOR":
         operator = this._eat("ADDITITIVE_OPERATOR").value;
         break;
