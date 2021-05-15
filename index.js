@@ -3,7 +3,7 @@ const { Parser } = require("./Parser");
 const parser = new Parser();
 
 const source = `
-  def add() {}
+  a.b.c["d"];
 `;
 
 const ast = parser.parse(source);
