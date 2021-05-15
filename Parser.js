@@ -68,7 +68,52 @@ class Parser {
   }
 
   Expression() {
-    return this.AdditiveExpression();
+    return this.AssignmentExpression();
+  }
+
+  // LefthandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
+  AssignmentExpression() {
+    let left = this.AdditiveExpression();
+
+    if (!this._isAssignmentOperator(this._lookahead?.type)) {
+      return left;
+    }
+
+    return {
+      type: "AssignmentExpression",
+      operator: this.AssignmentOperator().value,
+      left: this._checkValidAssignmentTarget(left),
+      right: this.AssignmentExpression(),
+    };
+  }
+
+  LeftHandSideExpression() {
+    return this.Identifier();
+  }
+
+  Identifier() {
+    let name = this._eat("IDENTIFIER").value;
+    return { type: "Identifier", name };
+  }
+
+  _checkValidAssignmentTarget(node) {
+    if (node.type === "Identifier") {
+      return node;
+    }
+    throw new SyntaxError(
+      `Invalid left-hand side in assignment expression, expected "Identifier" but got "${node.type}"`
+    );
+  }
+
+  AssignmentOperator() {
+    if (this._lookahead.type === "SIMPLE_ASSIGNMENT") {
+      return this._eat("SIMPLE_ASSIGNMENT");
+    }
+    return this._eat("COMPLEX_ASSIGNMENT");
+  }
+
+  _isAssignmentOperator(type) {
+    return type === "SIMPLE_ASSIGNMENT" || type === "COMPLEX_ASSIGNMENT";
   }
 
   // MultiplicativeExpression ADITITIVE_OPERATOR MultiplicativeExpression
@@ -107,12 +152,19 @@ class Parser {
   }
 
   PrimaryExpression() {
+    if (this._isLiteral(this._lookahead.type)) {
+      return this.Literal();
+    }
     switch (this._lookahead.type) {
       case "(":
         return this.ParenthesizedExpression();
       default:
-        return this.Literal();
+        return this.LeftHandSideExpression();
     }
+  }
+
+  _isLiteral(tokenType) {
+    return tokenType === "NUMBER" || tokenType === "STRING";
   }
 
   // ( Expression )
