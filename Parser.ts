@@ -16,7 +16,7 @@ import { DefaultASTFactory } from "./ASTFactories";
 
 const factory = DefaultASTFactory;
 
-class Parser {
+export class Parser {
   _string: string;
   _tokenizer: Tokenizer;
   _lookahead!: Token | null;
@@ -151,7 +151,7 @@ class Parser {
     this._eat(TokenTypes.while);
     this._eat(TokenTypes["("]);
     const test = this.Expression();
-    this._eat(TokenTypes["."]);
+    this._eat(TokenTypes[")"]);
     const body = this.Statement();
 
     return factory.WhileStatement(test, body);
@@ -164,7 +164,7 @@ class Parser {
     this._eat(TokenTypes.while);
     this._eat(TokenTypes["("]);
     const test = this.Expression();
-    this._eat(TokenTypes["."]);
+    this._eat(TokenTypes[")"]);
     this._eat(TokenTypes[";"]);
 
     return factory.DoWhileStatement(test, body);
@@ -187,7 +187,7 @@ class Parser {
 
     const update =
       this._lookahead?.type !== TokenTypes[")"] ? this.Expression() : null;
-    this._eat(TokenTypes["."]);
+    this._eat(TokenTypes[")"]);
 
     const body = this.Statement();
 
@@ -375,7 +375,7 @@ class Parser {
     const argumentList =
       this._lookahead?.type === TokenTypes[")"] ? [] : this.ArgumentList();
 
-    this._eat(TokenTypes["."]);
+    this._eat(TokenTypes[")"]);
 
     return argumentList;
   }
@@ -469,7 +469,7 @@ class Parser {
   ParenthesizedExpression() {
     this._eat(TokenTypes["("]);
     const expression = this.Expression();
-    this._eat(TokenTypes["."]);
+    this._eat(TokenTypes[")"]);
 
     return expression;
   }
@@ -499,7 +499,7 @@ class Parser {
 
   EqualityExpression() {
     return this._BinaryExpression(
-      this.RelationalExpression,
+      this.RelationalExpression.bind(this),
       TokenTypes.EQUALITY_OPERATOR
     );
   }
@@ -508,7 +508,7 @@ class Parser {
   // AdditiveExpression RELATIONAL_OPERATOR
   RelationalExpression() {
     return this._BinaryExpression(
-      this.AdditiveExpression,
+      this.AdditiveExpression.bind(this),
       TokenTypes.RELATIONAL_OPERATOR
     );
   }
@@ -516,7 +516,7 @@ class Parser {
   // MultiplicativeExpression ADDITITIVE_OPERATOR MultiplicativeExpression
   AdditiveExpression() {
     return this._BinaryExpression(
-      this.MultiplicativeExpression,
+      this.MultiplicativeExpression.bind(this),
       TokenTypes.ADDITITIVE_OPERATOR
     );
   }
@@ -524,21 +524,21 @@ class Parser {
   // UnaryExpression MULTIPLICATIVE_OPERATOR UnaryExpression
   MultiplicativeExpression() {
     return this._BinaryExpression(
-      this.UnaryExpression,
+      this.UnaryExpression.bind(this),
       TokenTypes.MULTIPLICATIVE_OPERATOR
     );
   }
 
   LogicalANDExpression() {
     return this._LogicalExpression(
-      this.EqualityExpression,
+      this.EqualityExpression.bind(this),
       TokenTypes.LOGICAL_AND
     );
   }
 
   LogicalORExpression() {
     return this._LogicalExpression(
-      this.LogicalANDExpression,
+      this.LogicalANDExpression.bind(this),
       TokenTypes.LOGICAL_OR
     );
   }

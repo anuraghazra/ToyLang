@@ -1,4 +1,4 @@
-const { Parser } = require("../Parser");
+import { Parser } from "../Parser";
 
 test("Test AST", () => {
   const parser = new Parser();
