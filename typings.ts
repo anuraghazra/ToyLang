@@ -79,7 +79,7 @@ export type UnaryOperators = "+" | "-";
 export interface UnaryExpression {
   type: "UnaryExpression";
   operator: string;
-  argument: CallMemberExpression | UnaryExpression;
+  argument: CallExpression | CallMemberExpression | UnaryExpression;
 }
 
 export interface MemberExpression {
@@ -89,13 +89,7 @@ export interface MemberExpression {
   property: Identifier | Expression;
 }
 
-export type CallMemberExpression =
-  | MemberExpression
-  | {
-      type: string;
-      callee: MemberExpression | Super;
-      arguments: Arguments;
-    };
+export type CallMemberExpression = MemberExpression | CallExpression;
 
 export interface CallExpression {
   type: "CallExpression";
@@ -110,7 +104,7 @@ export type Arguments = (
   | LogicalExpression
 )[];
 
-export type AssignmentOperators = "==" | "+=" | "-=" | "/=" | "*=";
+export type AssignmentOperators = "=" | "+=" | "-=" | "/=" | "*=";
 export interface AssignmentExpression {
   type: "AssignmentExpression";
   operator: AssignmentOperators;
@@ -162,7 +156,6 @@ export interface LogicalExpression {
 //   | CallMemberExpression;
 
 export type Expression =
-  | AssignmentExpression
   | CallExpression
   | AssignmentExpression
   | MemberExpression

@@ -29,6 +29,7 @@ import {
   NumericLiteral,
   BinaryExpression,
   LogicalExpression,
+  CallExpression,
 } from "./typings";
 
 export const DefaultASTFactory = {
@@ -190,7 +191,7 @@ export const DefaultASTFactory = {
   },
   UnaryExpression(
     operator: string,
-    argument: CallMemberExpression | UnaryExpression
+    argument: CallExpression | CallMemberExpression | UnaryExpression
   ): UnaryExpression {
     return {
       type: "UnaryExpression",

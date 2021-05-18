@@ -1,44 +1,44 @@
-const { RuntimeError } = require("./RuntimeError");
+import { RuntimeError } from "./RuntimeError";
 
-class Environment {
-  constructor(enclosing = null) {
+export class Environment {
+  values: Map<any, any>;
+  enclosing?: Environment | null;
+  constructor(enclosing: Environment | null = null) {
     this.values = new Map();
     this.enclosing = enclosing;
   }
 
-  add(name, value) {
+  add(name: string, value: any) {
     this.values.set(name, value);
   }
 
-  remove(name, value) {
-    this.values.delete(name, value);
+  remove(name: string) {
+    this.values.delete(name);
   }
 
-  get(name) {
+  get(name: string): any {
     if (this.values.has(name)) {
       return this.values.get(name);
     }
 
     if (this.enclosing !== null) {
-      return this.enclosing.get(name);
+      return this.enclosing?.get(name);
     }
 
     throw new RuntimeError(name, `Undeclared variable "${name}"`);
   }
 
-  assign(name, value) {
+  assign(name: string, value: any) {
     if (this.values.has(name)) {
       this.values.set(name, value);
       return;
     }
 
     if (this.enclosing !== null) {
-      this.enclosing.assign(name, value);
+      this.enclosing?.assign(name, value);
       return;
     }
 
     throw new RuntimeError(name, `Undeclared variable "${name}"`);
   }
 }
-
-module.exports = { Environment };

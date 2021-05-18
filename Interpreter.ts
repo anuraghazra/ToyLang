@@ -1,20 +1,49 @@
-const { CallableFunction, MusketFunction } = require("./CallableFunction");
-const { Environment } = require("./Environment");
-const { RuntimeError } = require("./RuntimeError");
-const { Return } = require("./Return");
+import { Environment } from "./Environment";
+import {
+  AssignmentExpression,
+  BinaryExpression,
+  BlockStatement,
+  CallExpression,
+  Expression,
+  ExpressionStatement,
+  ForStatement,
+  FunctionDeclaration,
+  Identifier,
+  IfStatement,
+  Literal,
+  LogicalExpression,
+  Program,
+  ReturnStatement,
+  Statement,
+  UnaryExpression,
+  VariableStatement,
+  WhileStatement,
+} from "./typings";
 
-function checkNumberOperands(node, left, right) {
-  if (typeof left === "number" && typeof right === "number") return;
+import { CallableFunction, MusketFunction } from "./CallableFunction";
+import { RuntimeError } from "./RuntimeError";
+import { Return } from "./Return";
+
+function checkNumberOperands(
+  node: any,
+  left: string | number,
+  right: string | number
+) {
+  if (typeof left === "number" && typeof right === "number") return true;
 
   throw new RuntimeError("Operands must be numbers.", node);
 }
-function checkNumberOperand(node, operand) {
+
+function checkNumberOperand(node: any, operand: string | number) {
   if (typeof operand === "number") return;
 
   throw new RuntimeError("Operand must be number.", node);
 }
 
-class Interpreter {
+export class Interpreter {
+  ast: Program | null;
+  globals: Environment;
+  environment: Environment;
   constructor() {
     this.ast = null;
     this.globals = new Environment();
@@ -24,7 +53,7 @@ class Interpreter {
       CallableFunction.new({
         arity: 0,
         call() {
-          return new Date() / 1000.0;
+          return +new Date() / 1000.0;
         },
         toString() {
           return `<native fn>`;
@@ -35,7 +64,7 @@ class Interpreter {
       "mod",
       CallableFunction.new({
         arity: 2,
-        call(_, args) {
+        call(_: any, args: number[]) {
           return args[0] % args[1];
         },
         toString() {
@@ -60,13 +89,26 @@ class Interpreter {
     this.environment = this.globals;
   }
 
-  execute(ast) {
+  execute(ast: Program) {
     this.ast = ast;
 
     return this.visit(this.ast);
   }
 
-  visit(node) {
+  visit(
+    node:
+      | null
+      | Statement
+      | Expression
+      | UnaryExpression
+      | BinaryExpression
+      | CallExpression
+      | Program
+      | Literal
+      | Identifier
+  ): number | string | CallableFunction | null | boolean | void {
+    if (node == null) return;
+
     switch (node.type) {
       case "ExpressionStatement":
         return this.visitExpression(node);
@@ -107,62 +149,73 @@ class Interpreter {
     }
   }
 
-  visitIdentifier(node) {
+  visitIdentifier(node: Identifier): number | string | CallableFunction {
     return this.environment.get(node.name);
   }
 
-  visitExpression(node) {
+  visitExpression(node: ExpressionStatement) {
     return this.visit(node.expression);
   }
 
-  visitAssignmentExpression(node) {
+  visitAssignmentExpression(node: AssignmentExpression) {
     let value = this.visit(node.right);
 
-    let lhs = this.environment.get(node.left.name);
+    const left = node.left as Identifier;
+    let lhs = this.environment.get(left.name);
+
     switch (node.operator) {
       case "=":
-        this.environment.assign(node.left.name, value);
+        this.environment.assign(left.name, value);
         break;
       case "+=":
         lhs += value;
-        this.environment.assign(node.left.name, lhs);
+        this.environment.assign(left.name, lhs);
         break;
       case "-=":
+        if (typeof value !== "number") {
+          throw new RuntimeError("Operand must be a number", node);
+        }
         lhs -= value;
-        this.environment.assign(node.left.name, lhs);
+        this.environment.assign(left.name, lhs);
         break;
       case "/=":
+        if (typeof value !== "number") {
+          throw new RuntimeError("Operand must be a number", node);
+        }
         lhs /= value;
-        this.environment.assign(node.left.name, lhs);
+        this.environment.assign(left.name, lhs);
         break;
       case "*=":
+        if (typeof value !== "number") {
+          throw new RuntimeError("Operand must be a number", node);
+        }
         lhs *= value;
-        this.environment.assign(node.left.name, lhs);
+        this.environment.assign(left.name, lhs);
         break;
     }
 
     return lhs;
   }
 
-  visitReturnStatement(node) {
+  visitReturnStatement(node: ReturnStatement) {
     let value = null;
     if (node.argument !== null) value = this.visit(node.argument);
 
     throw new Return(value);
   }
 
-  visitFunctionDeclaration(node) {
+  visitFunctionDeclaration(node: FunctionDeclaration) {
     let fun = new MusketFunction(node);
     this.environment.add(node.name.name, fun);
     return null;
   }
-  visitCallExpression(node) {
+  visitCallExpression(node: CallExpression) {
     // this.printFunction(node);
     // calle should be MusketFunction.
-    const callee = this.visit(node.callee);
+    const callee = this.visit(node.callee) as CallableFunction;
 
-    if (!callee.prototype instanceof CallableFunction) {
-      throw new RuntimeError(node, "Can only call functions and classes.");
+    if ((!(callee as any).prototype as unknown) instanceof CallableFunction) {
+      throw new RuntimeError("Can only call functions and classes", node);
     }
 
     const args = [];
@@ -173,15 +226,19 @@ class Interpreter {
     // Todo fix infinity
     if (args.length != callee.arity() && callee.arity() !== Infinity) {
       throw new RuntimeError(
-        node,
-        "Expected " + callee.arity() + " arguments but got " + args.length + "."
+        "Expected " +
+          callee.arity() +
+          " arguments but got " +
+          args.length +
+          ".",
+        node
       );
     }
 
     return callee.call(this, args);
   }
 
-  visitVariableStatement(node) {
+  visitVariableStatement(node: VariableStatement) {
     for (const declaration of node.declarations) {
       let value = null;
       if (declaration.init != null) {
@@ -191,15 +248,16 @@ class Interpreter {
       this.environment.add(declaration.id.name, value);
       return null;
     }
+    return null;
   }
 
-  visitBlockStatement(node) {
+  visitBlockStatement(node: BlockStatement) {
     this.executeBlock(node.body, new Environment(this.environment));
     return null;
   }
 
   // scopes!!
-  executeBlock(statements, environment) {
+  executeBlock(statements: Statement[], environment: Environment) {
     // save the current env
     const previous = this.environment;
     try {
@@ -215,7 +273,7 @@ class Interpreter {
     }
   }
 
-  visitIfStatement(node) {
+  visitIfStatement(node: IfStatement) {
     const test = this.visit(node.test);
 
     if (test) {
@@ -226,14 +284,14 @@ class Interpreter {
     return null;
   }
 
-  visitWhileStatement(node) {
+  visitWhileStatement(node: WhileStatement) {
     while (this.visit(node.test)) {
       this.visit(node.body);
     }
     return null;
   }
 
-  visitForStatement(node) {
+  visitForStatement(node: ForStatement) {
     // hacky
     if (node.init === null && node.test === null && node.update === null) {
       for (;;) {
@@ -251,16 +309,19 @@ class Interpreter {
     return null;
   }
 
-  visitBinaryExpression(node) {
+  visitBinaryExpression(node: BinaryExpression) {
     const op = node.operator;
 
-    let left = this.visit(node.left);
-    let right = this.visit(node.right);
+    let left = this.visit(node.left) as number;
+    let right = this.visit(node.right) as number;
 
     switch (op) {
-      case "-":
-        checkNumberOperands(node, left, right);
-        return left - right;
+      case "==":
+        return left == right;
+
+      case "!=":
+        return left != right;
+
       case "+":
         if (typeof left === "number" && typeof right === "number") {
           return left + right;
@@ -272,28 +333,40 @@ class Interpreter {
           `Runtime: Mismatched type, cannot "${typeof left}" + "${typeof right}"`,
           node
         );
+
+      case "-":
+        checkNumberOperands(node, left, right);
+        return left - right;
+
       case "/":
+        checkNumberOperands(node, left, right);
         return left / right;
+
       case "*":
+        checkNumberOperands(node, left, right);
         return left * right;
-      case "==":
-        return left == right;
-      case "!=":
-        return left != right;
+
       case ">":
+        checkNumberOperands(node, left, right);
         return left > right;
+
       case "<":
+        checkNumberOperands(node, left, right);
         return left < right;
+
       case ">=":
+        checkNumberOperands(node, left, right);
         return left >= right;
+
       case "<=":
+        checkNumberOperands(node, left, right);
         return left <= right;
     }
 
     throw new Error("Runtime: Unknown Binary operation");
   }
 
-  visitLogicalExpression(node) {
+  visitLogicalExpression(node: LogicalExpression) {
     const op = node.operator;
 
     let left = this.visit(node.left);
@@ -309,7 +382,7 @@ class Interpreter {
     throw new Error("Runtime: Unknown Logical operation");
   }
 
-  visitLiterals(node) {
+  visitLiterals(node: Literal) {
     switch (node.type) {
       case "NumericLiteral":
         return node.value;
@@ -325,13 +398,13 @@ class Interpreter {
     }
   }
 
-  visitUnaryExpression(node) {
-    const right = this.visit(node.argument);
+  visitUnaryExpression(node: UnaryExpression) {
+    const right = this.visit(node.argument as CallExpression);
 
     switch (node.operator) {
       case "-":
-        checkNumberOperand(node, right);
-        return -right;
+        checkNumberOperand(node, right as number);
+        return -(right as number);
       case "+":
         return right;
       case "!":
@@ -341,9 +414,8 @@ class Interpreter {
     return null;
   }
 
-  visitProgram(node) {
-    return node.body.map((statement) => this.visit(statement));
+  visitProgram(node: Program) {
+    node.body.map((statement) => this.visit(statement));
+    return null;
   }
 }
-
-module.exports = { Interpreter };

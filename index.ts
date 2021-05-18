@@ -4,7 +4,6 @@ const { Interpreter } = require("./Interpreter");
 const parser = new Parser();
 const interpreter = new Interpreter();
 
-// YEY!! :D
 const fibonacciSource = `
 // Comments
   def fib(n) {
@@ -47,7 +46,7 @@ const source = `
   print("Factorial result:", factorial(6));
 `;
 
-const ast = parser.parse(fibonacciSource);
+const ast = parser.parse(source);
 
 const result = interpreter.execute(ast);
 

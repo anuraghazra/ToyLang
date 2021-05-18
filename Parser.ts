@@ -315,7 +315,7 @@ export class Parser {
     });
   }
 
-  UnaryExpression(): CallMemberExpression | UnaryExpression {
+  UnaryExpression(): CallExpression | CallMemberExpression | UnaryExpression {
     let operator;
 
     switch (this._lookahead?.type) {
