@@ -1,28 +1,17 @@
-import {
-  AssignmentOperators,
-  BinaryExpression,
-  CallExpression,
-  CallMemberExpression,
-  Expression,
-  Literal,
-  LogicalExpression,
-  MemberExpression,
-  Statement,
-  Super,
-  UnaryExpression,
-} from "./typings";
+import { ToyLang } from "./typings";
 import { Token, Tokenizer, TokenTypes } from "./Tokenizer";
-import { DefaultASTFactory } from "./ASTFactories";
-
-const factory = DefaultASTFactory;
+import { ASTFactory, DefaultASTFactory } from "./ASTFactories";
 
 export class Parser {
   _string: string;
   _tokenizer: Tokenizer;
   _lookahead!: Token | null;
-  constructor() {
+  factory: ASTFactory;
+
+  constructor(astFactory = DefaultASTFactory) {
     this._string = "";
     this._tokenizer = new Tokenizer();
+    this.factory = astFactory;
   }
 
   parse(string: string) {
@@ -36,7 +25,7 @@ export class Parser {
   }
 
   Program() {
-    return factory.Program(this.StatementList());
+    return this.factory.Program(this.StatementList());
   }
 
   StatementList(stopLookhead?: TokenTypes) {
@@ -49,7 +38,7 @@ export class Parser {
     return statementList;
   }
 
-  Statement(): Statement {
+  Statement(): ToyLang.Statement {
     switch (this._lookahead?.type) {
       case TokenTypes.let:
         return this.VariableStatement();
@@ -85,7 +74,7 @@ export class Parser {
 
     const body = this.BlockStatement();
 
-    return factory.ClassDeclaration(id, body, superClass);
+    return this.factory.ClassDeclaration(id, body, superClass);
   }
 
   ClassExtends() {
@@ -106,7 +95,7 @@ export class Parser {
 
     const body = this.BlockStatement();
 
-    return factory.FunctionStatement(name, body, params);
+    return this.factory.FunctionStatement(name, body, params);
   }
 
   FunctionArguments() {
@@ -129,7 +118,7 @@ export class Parser {
       this._lookahead?.type === TokenTypes[";"] ? null : this.Expression();
     this._eat(TokenTypes[";"]);
 
-    return factory.ReturnStatement(argument);
+    return this.factory.ReturnStatement(argument);
   }
 
   IterationStatement() {
@@ -154,7 +143,7 @@ export class Parser {
     this._eat(TokenTypes[")"]);
     const body = this.Statement();
 
-    return factory.WhileStatement(test, body);
+    return this.factory.WhileStatement(test, body);
   }
 
   // `do` Statement `while` `(` expression `)`
@@ -167,7 +156,7 @@ export class Parser {
     this._eat(TokenTypes[")"]);
     this._eat(TokenTypes[";"]);
 
-    return factory.DoWhileStatement(test, body);
+    return this.factory.DoWhileStatement(test, body);
   }
 
   // for `(` Statement `;` Statement `;` Statement `)` Statement
@@ -191,7 +180,7 @@ export class Parser {
 
     const body = this.Statement();
 
-    return factory.ForStatement({ init, test, update, body });
+    return this.factory.ForStatement({ init, test, update, body });
   }
 
   ForStatementInit() {
@@ -216,14 +205,14 @@ export class Parser {
       alternate = this.Statement();
     }
 
-    return factory.IfStatement(expression, statement, alternate);
+    return this.factory.IfStatement(expression, statement, alternate);
   }
 
   // let VariableDeclarationList
   VariableStatementInit() {
     this._eat(TokenTypes.let);
     const declarations = this.VariableDeclarationList();
-    return factory.VariableStatement(declarations);
+    return this.factory.VariableStatement(declarations);
   }
 
   // let VariableDeclarationList ';'
@@ -255,7 +244,7 @@ export class Parser {
         ? this.VariableInitializer()
         : null;
 
-    return factory.VariableDeclaration(id, init);
+    return this.factory.VariableDeclaration(id, init);
   }
 
   // SIMPLE_ASSIGNMENT AssignmentExpression
@@ -267,12 +256,12 @@ export class Parser {
 
   EmptyStatement() {
     this._eat(TokenTypes[";"]);
-    return factory.EmptyStatement();
+    return this.factory.EmptyStatement();
   }
 
   Identifier() {
     let name = this._eat(TokenTypes.IDENTIFIER).value;
-    return factory.Identifier(name);
+    return this.factory.Identifier(name);
   }
 
   // { OptStatementList }
@@ -286,14 +275,14 @@ export class Parser {
 
     this._eat(TokenTypes["}"]);
 
-    return factory.BlockStatement(body);
+    return this.factory.BlockStatement(body);
   }
 
   ExpressionStatement() {
     const expression = this.Expression();
     this._eat(TokenTypes[";"]);
 
-    return factory.ExpressionStatement(expression);
+    return this.factory.ExpressionStatement(expression);
   }
 
   Expression() {
@@ -301,21 +290,24 @@ export class Parser {
   }
 
   // LefthandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
-  AssignmentExpression(): Expression {
+  AssignmentExpression(): ToyLang.Expression {
     let left = this.LogicalORExpression();
 
     if (!this._isAssignmentOperator(this._lookahead?.type)) {
       return left;
     }
 
-    return factory.AssignmentExpression({
-      operator: this.AssignmentOperator().value as AssignmentOperators,
+    return this.factory.AssignmentExpression({
+      operator: this.AssignmentOperator().value as ToyLang.AssignmentOperators,
       left: this._checkValidAssignmentTarget(left),
       right: this.AssignmentExpression(),
     });
   }
 
-  UnaryExpression(): CallExpression | CallMemberExpression | UnaryExpression {
+  UnaryExpression():
+    | ToyLang.CallExpression
+    | ToyLang.CallMemberExpression
+    | ToyLang.UnaryExpression {
     let operator;
 
     switch (this._lookahead?.type) {
@@ -328,7 +320,7 @@ export class Parser {
     }
 
     if (operator) {
-      return factory.UnaryExpression(operator, this.UnaryExpression());
+      return this.factory.UnaryExpression(operator, this.UnaryExpression());
     }
 
     return this.LeftHandSideExpression();
@@ -354,12 +346,12 @@ export class Parser {
     return member;
   }
 
-  _CallExpression(callee: CallMemberExpression | Super) {
+  _CallExpression(callee: ToyLang.CallMemberExpression | ToyLang.Super) {
     let callExpression = {
       type: "CallExpression",
       callee,
       arguments: this.Arguments(),
-    } as CallExpression;
+    } as ToyLang.CallExpression;
 
     if (this._lookahead?.type === TokenTypes["("]) {
       callExpression = this._CallExpression(callExpression);
@@ -397,7 +389,7 @@ export class Parser {
   // PrimaryExpression
   // MemberExpression `.` Identifier
   // MemberExpression `[` Expression `]`
-  MemberExpression(): MemberExpression {
+  MemberExpression(): ToyLang.MemberExpression {
     let object = this.PrimaryExpression();
 
     while (
@@ -412,7 +404,7 @@ export class Parser {
           computed: false,
           object,
           property,
-        } as MemberExpression;
+        } as ToyLang.MemberExpression;
       }
       if (this._lookahead?.type === TokenTypes["["]) {
         this._eat(TokenTypes["["]);
@@ -423,11 +415,11 @@ export class Parser {
           computed: true,
           object,
           property,
-        } as MemberExpression;
+        } as ToyLang.MemberExpression;
       }
     }
 
-    return object as MemberExpression;
+    return object as ToyLang.MemberExpression;
   }
 
   PrimaryExpression() {
@@ -451,18 +443,21 @@ export class Parser {
   NewExpression() {
     this._eat(TokenTypes.new);
 
-    return factory.NewExpression(this.MemberExpression(), this.Arguments());
+    return this.factory.NewExpression(
+      this.MemberExpression(),
+      this.Arguments()
+    );
   }
 
   ThisExpression() {
     this._eat(TokenTypes.this);
-    return factory.ThisExpression();
+    return this.factory.ThisExpression();
   }
 
   Super() {
     this._eat(TokenTypes.super);
 
-    return factory.Super();
+    return this.factory.Super();
   }
 
   // ( Expression )
@@ -474,7 +469,9 @@ export class Parser {
     return expression;
   }
 
-  _checkValidAssignmentTarget<T extends BinaryExpression["left"]>(node: T) {
+  _checkValidAssignmentTarget<T extends ToyLang.BinaryExpression["left"]>(
+    node: T
+  ) {
     if (node.type === "Identifier" || node.type === "MemberExpression") {
       return node;
     }
@@ -546,7 +543,7 @@ export class Parser {
   _BinaryExpression<T extends Function>(
     builder: T,
     tokenType: TokenTypes
-  ): BinaryExpression {
+  ): ToyLang.BinaryExpression {
     let left = builder();
 
     while (this._lookahead?.type === tokenType) {
@@ -554,7 +551,7 @@ export class Parser {
 
       const right = builder();
 
-      left = factory.BinaryExpression(operator, left, right);
+      left = this.factory.BinaryExpression(operator, left, right);
     }
 
     return left;
@@ -563,7 +560,7 @@ export class Parser {
   _LogicalExpression<T extends Function>(
     builder: T,
     tokenType: TokenTypes
-  ): LogicalExpression {
+  ): ToyLang.LogicalExpression {
     let left = builder();
 
     while (this._lookahead?.type === tokenType) {
@@ -571,7 +568,7 @@ export class Parser {
 
       const right = builder();
 
-      left = factory.LogicalExpression(operator, left, right);
+      left = this.factory.LogicalExpression(operator, left, right);
     }
 
     return left;
@@ -589,7 +586,7 @@ export class Parser {
     ].includes(tokenType);
   }
 
-  Literal(): Literal {
+  Literal(): ToyLang.Literal {
     switch (this._lookahead?.type) {
       case TokenTypes.NUMBER:
         return this.NumericLiteral();
@@ -608,24 +605,24 @@ export class Parser {
 
   NullLiteral() {
     this._eat(TokenTypes.null);
-    return factory.NullLiteral();
+    return this.factory.NullLiteral();
   }
 
   BooleanLiteral(value: boolean) {
     this._eat(value ? "true" : "false");
 
-    return factory.BooleanLiteral(value);
+    return this.factory.BooleanLiteral(value);
   }
 
   NumericLiteral() {
     const token = this._eat(TokenTypes.NUMBER);
 
-    return factory.NumericLiteral(Number(token.value));
+    return this.factory.NumericLiteral(Number(token.value));
   }
 
   StringLiteral() {
     const token = this._eat(TokenTypes.STRING);
-    return factory.StringLiteral(token.value.slice(1, -1));
+    return this.factory.StringLiteral(token.value.slice(1, -1));
   }
 
   _eat(tokenType: keyof typeof TokenTypes) {

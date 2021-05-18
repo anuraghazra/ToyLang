@@ -1,5 +1,5 @@
 // @ts-check
-import { Parser } from "../Parser";
+import { Parser } from "../src/Parser";
 
 const parser = new Parser();
 

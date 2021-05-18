@@ -1,5 +1,5 @@
-const { Parser } = require("./Parser");
-const { Interpreter } = require("./Interpreter");
+import { Parser } from "./src/Parser";
+import { Interpreter } from "./src/Interpreter";
 
 const parser = new Parser();
 const interpreter = new Interpreter();

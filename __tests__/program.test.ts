@@ -1,4 +1,4 @@
-import { Parser } from "../Parser";
+import { Parser } from "../src/Parser";
 
 test("Test AST", () => {
   const parser = new Parser();
