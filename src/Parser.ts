@@ -1,4 +1,4 @@
-import { ToyLang } from "./typings";
+import { tl } from "./typings";
 import { Token, Tokenizer, TokenTypes } from "./Tokenizer";
 import { ASTFactory, DefaultASTFactory } from "./ASTFactories";
 
@@ -8,7 +8,7 @@ export class Parser {
   _lookahead!: Token | null;
   factory: ASTFactory;
 
-  constructor(astFactory = DefaultASTFactory) {
+  constructor(astFactory: ASTFactory = DefaultASTFactory) {
     this._string = "";
     this._tokenizer = new Tokenizer();
     this.factory = astFactory;
@@ -38,7 +38,7 @@ export class Parser {
     return statementList;
   }
 
-  Statement(): ToyLang.Statement {
+  Statement(): tl.Statement {
     switch (this._lookahead?.type) {
       case TokenTypes.let:
         return this.VariableStatement();
@@ -290,7 +290,7 @@ export class Parser {
   }
 
   // LefthandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression
-  AssignmentExpression(): ToyLang.Expression {
+  AssignmentExpression(): tl.Expression {
     let left = this.LogicalORExpression();
 
     if (!this._isAssignmentOperator(this._lookahead?.type)) {
@@ -298,16 +298,16 @@ export class Parser {
     }
 
     return this.factory.AssignmentExpression({
-      operator: this.AssignmentOperator().value as ToyLang.AssignmentOperators,
+      operator: this.AssignmentOperator().value as tl.AssignmentOperators,
       left: this._checkValidAssignmentTarget(left),
       right: this.AssignmentExpression(),
     });
   }
 
   UnaryExpression():
-    | ToyLang.CallExpression
-    | ToyLang.CallMemberExpression
-    | ToyLang.UnaryExpression {
+    | tl.CallExpression
+    | tl.CallMemberExpression
+    | tl.UnaryExpression {
     let operator;
 
     switch (this._lookahead?.type) {
@@ -346,12 +346,12 @@ export class Parser {
     return member;
   }
 
-  _CallExpression(callee: ToyLang.CallMemberExpression | ToyLang.Super) {
+  _CallExpression(callee: tl.CallMemberExpression | tl.Super) {
     let callExpression = {
-      type: "CallExpression",
+      type: tl.SyntaxKind.CallExpression,
       callee,
       arguments: this.Arguments(),
-    } as ToyLang.CallExpression;
+    } as tl.CallExpression;
 
     if (this._lookahead?.type === TokenTypes["("]) {
       callExpression = this._CallExpression(callExpression);
@@ -389,7 +389,7 @@ export class Parser {
   // PrimaryExpression
   // MemberExpression `.` Identifier
   // MemberExpression `[` Expression `]`
-  MemberExpression(): ToyLang.MemberExpression {
+  MemberExpression(): tl.MemberExpression {
     let object = this.PrimaryExpression();
 
     while (
@@ -400,26 +400,26 @@ export class Parser {
         this._eat(TokenTypes["."]);
         const property = this.Identifier();
         object = {
-          type: "MemberExpression",
+          type: tl.SyntaxKind.MemberExpression,
           computed: false,
           object,
           property,
-        } as ToyLang.MemberExpression;
+        } as tl.MemberExpression;
       }
       if (this._lookahead?.type === TokenTypes["["]) {
         this._eat(TokenTypes["["]);
         const property = this.Expression();
         this._eat(TokenTypes["]"]);
         object = {
-          type: "MemberExpression",
+          type: tl.SyntaxKind.MemberExpression,
           computed: true,
           object,
           property,
-        } as ToyLang.MemberExpression;
+        } as tl.MemberExpression;
       }
     }
 
-    return object as ToyLang.MemberExpression;
+    return object as tl.MemberExpression;
   }
 
   PrimaryExpression() {
@@ -427,13 +427,13 @@ export class Parser {
       return this.Literal();
     }
     switch (this._lookahead?.type) {
-      case "(":
+      case TokenTypes["("]:
         return this.ParenthesizedExpression();
-      case "IDENTIFIER":
+      case TokenTypes.IDENTIFIER:
         return this.Identifier();
-      case "this":
+      case TokenTypes.this:
         return this.ThisExpression();
-      case "new":
+      case TokenTypes.new:
         return this.NewExpression();
       default:
         return this.LeftHandSideExpression();
@@ -469,10 +469,11 @@ export class Parser {
     return expression;
   }
 
-  _checkValidAssignmentTarget<T extends ToyLang.BinaryExpression["left"]>(
-    node: T
-  ) {
-    if (node.type === "Identifier" || node.type === "MemberExpression") {
+  _checkValidAssignmentTarget<T extends tl.BinaryExpression["left"]>(node: T) {
+    if (
+      node.type === tl.SyntaxKind.Identifier ||
+      node.type === tl.SyntaxKind.MemberExpression
+    ) {
       return node;
     }
     throw new SyntaxError(
@@ -543,7 +544,7 @@ export class Parser {
   _BinaryExpression<T extends Function>(
     builder: T,
     tokenType: TokenTypes
-  ): ToyLang.BinaryExpression {
+  ): tl.BinaryExpression {
     let left = builder();
 
     while (this._lookahead?.type === tokenType) {
@@ -560,7 +561,7 @@ export class Parser {
   _LogicalExpression<T extends Function>(
     builder: T,
     tokenType: TokenTypes
-  ): ToyLang.LogicalExpression {
+  ): tl.LogicalExpression {
     let left = builder();
 
     while (this._lookahead?.type === tokenType) {
@@ -586,7 +587,7 @@ export class Parser {
     ].includes(tokenType);
   }
 
-  Literal(): ToyLang.Literal {
+  Literal(): tl.Literal {
     switch (this._lookahead?.type) {
       case TokenTypes.NUMBER:
         return this.NumericLiteral();
@@ -609,7 +610,7 @@ export class Parser {
   }
 
   BooleanLiteral(value: boolean) {
-    this._eat(value ? "true" : "false");
+    this._eat(value ? TokenTypes.true : TokenTypes.false);
 
     return this.factory.BooleanLiteral(value);
   }

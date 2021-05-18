@@ -1,5 +1,5 @@
 import { Environment } from "./Environment";
-import { ToyLang } from "./typings";
+import { tl } from "./typings";
 
 import { CallableFunction, MusketFunction } from "./CallableFunction";
 import { RuntimeError } from "./RuntimeError";
@@ -22,7 +22,7 @@ function checkNumberOperand(node: any, operand: string | number) {
 }
 
 export class Interpreter {
-  ast: ToyLang.Program | null;
+  ast: tl.Program | null;
   globals: Environment;
   environment: Environment;
   constructor() {
@@ -70,7 +70,7 @@ export class Interpreter {
     this.environment = this.globals;
   }
 
-  execute(ast: ToyLang.Program) {
+  execute(ast: tl.Program) {
     this.ast = ast;
 
     return this.visit(this.ast);
@@ -79,14 +79,14 @@ export class Interpreter {
   visit(
     node:
       | null
-      | ToyLang.Statement
-      | ToyLang.Expression
-      | ToyLang.UnaryExpression
-      | ToyLang.BinaryExpression
-      | ToyLang.CallExpression
-      | ToyLang.Program
-      | ToyLang.Literal
-      | ToyLang.Identifier
+      | tl.Statement
+      | tl.Expression
+      | tl.UnaryExpression
+      | tl.BinaryExpression
+      | tl.CallExpression
+      | tl.Program
+      | tl.Literal
+      | tl.Identifier
   ): number | string | CallableFunction | null | boolean | void {
     if (node == null) return;
 
@@ -130,20 +130,18 @@ export class Interpreter {
     }
   }
 
-  visitIdentifier(
-    node: ToyLang.Identifier
-  ): number | string | CallableFunction {
+  visitIdentifier(node: tl.Identifier): number | string | CallableFunction {
     return this.environment.get(node.name);
   }
 
-  visitExpression(node: ToyLang.ExpressionStatement) {
+  visitExpression(node: tl.ExpressionStatement) {
     return this.visit(node.expression);
   }
 
-  visitAssignmentExpression(node: ToyLang.AssignmentExpression) {
+  visitAssignmentExpression(node: tl.AssignmentExpression) {
     let value = this.visit(node.right);
 
-    const left = node.left as ToyLang.Identifier;
+    const left = node.left as tl.Identifier;
     let lhs = this.environment.get(left.name);
 
     switch (node.operator) {
@@ -180,19 +178,19 @@ export class Interpreter {
     return lhs;
   }
 
-  visitReturnStatement(node: ToyLang.ReturnStatement) {
+  visitReturnStatement(node: tl.ReturnStatement) {
     let value = null;
     if (node.argument !== null) value = this.visit(node.argument);
 
     throw new Return(value);
   }
 
-  visitFunctionDeclaration(node: ToyLang.FunctionDeclaration) {
+  visitFunctionDeclaration(node: tl.FunctionDeclaration) {
     let fun = new MusketFunction(node);
     this.environment.add(node.name.name, fun);
     return null;
   }
-  visitCallExpression(node: ToyLang.CallExpression) {
+  visitCallExpression(node: tl.CallExpression) {
     // this.printFunction(node);
     // calle should be MusketFunction.
     const callee = this.visit(node.callee) as CallableFunction;
@@ -221,7 +219,7 @@ export class Interpreter {
     return callee.call(this, args);
   }
 
-  visitVariableStatement(node: ToyLang.VariableStatement) {
+  visitVariableStatement(node: tl.VariableStatement) {
     for (const declaration of node.declarations) {
       let value = null;
       if (declaration.init != null) {
@@ -234,13 +232,13 @@ export class Interpreter {
     return null;
   }
 
-  visitBlockStatement(node: ToyLang.BlockStatement) {
+  visitBlockStatement(node: tl.BlockStatement) {
     this.executeBlock(node.body, new Environment(this.environment));
     return null;
   }
 
   // scopes!!
-  executeBlock(statements: ToyLang.Statement[], environment: Environment) {
+  executeBlock(statements: tl.Statement[], environment: Environment) {
     // save the current env
     const previous = this.environment;
     try {
@@ -256,7 +254,7 @@ export class Interpreter {
     }
   }
 
-  visitIfStatement(node: ToyLang.IfStatement) {
+  visitIfStatement(node: tl.IfStatement) {
     const test = this.visit(node.test);
 
     if (test) {
@@ -267,14 +265,14 @@ export class Interpreter {
     return null;
   }
 
-  visitWhileStatement(node: ToyLang.WhileStatement) {
+  visitWhileStatement(node: tl.WhileStatement) {
     while (this.visit(node.test)) {
       this.visit(node.body);
     }
     return null;
   }
 
-  visitForStatement(node: ToyLang.ForStatement) {
+  visitForStatement(node: tl.ForStatement) {
     // hacky
     if (node.init === null && node.test === null && node.update === null) {
       for (;;) {
@@ -292,7 +290,7 @@ export class Interpreter {
     return null;
   }
 
-  visitBinaryExpression(node: ToyLang.BinaryExpression) {
+  visitBinaryExpression(node: tl.BinaryExpression) {
     const op = node.operator;
 
     let left = this.visit(node.left) as number;
@@ -349,7 +347,7 @@ export class Interpreter {
     throw new Error("Runtime: Unknown Binary operation");
   }
 
-  visitLogicalExpression(node: ToyLang.LogicalExpression) {
+  visitLogicalExpression(node: tl.LogicalExpression) {
     const op = node.operator;
 
     let left = this.visit(node.left);
@@ -365,7 +363,7 @@ export class Interpreter {
     throw new Error("Runtime: Unknown Logical operation");
   }
 
-  visitLiterals(node: ToyLang.Literal) {
+  visitLiterals(node: tl.Literal) {
     switch (node.type) {
       case "NumericLiteral":
         return node.value;
@@ -381,8 +379,8 @@ export class Interpreter {
     }
   }
 
-  visitUnaryExpression(node: ToyLang.UnaryExpression) {
-    const right = this.visit(node.argument as ToyLang.CallExpression);
+  visitUnaryExpression(node: tl.UnaryExpression) {
+    const right = this.visit(node.argument as tl.CallExpression);
 
     switch (node.operator) {
       case "-":
@@ -397,7 +395,7 @@ export class Interpreter {
     return null;
   }
 
-  visitProgram(node: ToyLang.Program) {
+  visitProgram(node: tl.Program) {
     node.body.map((statement) => this.visit(statement));
     return null;
   }

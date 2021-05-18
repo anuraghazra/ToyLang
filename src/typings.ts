@@ -1,30 +1,60 @@
-export namespace ToyLang {
+export namespace tl {
   //
   // Basic
   //
+  export enum SyntaxKind {
+    Program = "Program",
+    Identifier = "Identifier",
+    StringLiteral = "StringLiteral",
+    NumericLiteral = "NumericLiteral",
+    NullLiteral = "NullLiteral",
+    BooleanLiteral = "BooleanLiteral",
+    ClassDeclaration = "ClassDeclaration",
+    FunctionDeclaration = "FunctionDeclaration",
+    VariableDeclaration = "VariableDeclaration",
+    VariableStatement = "VariableStatement",
+    Super = "Super",
+    NewExpression = "NewExpression",
+    ThisExpression = "ThisExpression",
+    UnaryExpression = "UnaryExpression",
+    MemberExpression = "MemberExpression",
+    CallExpression = "CallExpression",
+    AssignmentExpression = "AssignmentExpression",
+    BinaryExpression = "BinaryExpression",
+    LogicalExpression = "LogicalExpression",
+    ExpressionStatement = "ExpressionStatement",
+    ReturnStatement = "ReturnStatement",
+    EmptyStatement = "EmptyStatement",
+    BlockStatement = "BlockStatement",
+    IfStatement = "IfStatement",
+    ForStatement = "ForStatement",
+    WhileStatement = "WhileStatement",
+    DoWhileStatement = "DoWhileStatement",
+  }
+
   export interface Program {
-    type: "Program";
+    type: SyntaxKind.Program;
     body: Statement[];
   }
   export interface Identifier {
-    type: "Identifier";
+    type: SyntaxKind.Identifier;
     name: string;
   }
 
   export interface StringLiteral {
-    type: "StringLiteral";
+    type: SyntaxKind.StringLiteral;
     value: string;
   }
   export interface NumericLiteral {
-    type: "NumericLiteral";
+    type: SyntaxKind.NumericLiteral;
     value: number;
   }
   export interface NullLiteral {
-    type: "NullLiteral";
+    type: SyntaxKind.NullLiteral;
     value: null;
   }
   export interface BooleanLiteral {
-    type: "BooleanLiteral";
+    type: SyntaxKind.BooleanLiteral;
     value: boolean;
   }
   export type Literal =
@@ -34,27 +64,27 @@ export namespace ToyLang {
     | NullLiteral;
 
   export interface ClassDeclaration {
-    type: "ClassDeclaration";
+    type: SyntaxKind.ClassDeclaration;
     superClass: Identifier | null;
     id: Identifier;
     body: BlockStatement;
   }
 
   export interface FunctionDeclaration {
-    type: "FunctionDeclaration";
+    type: SyntaxKind.FunctionDeclaration;
     name: Identifier;
     body: BlockStatement;
     params: Identifier[] | null;
   }
 
   export interface VariableDeclaration {
-    type: "VariableDeclaration";
+    type: SyntaxKind.VariableDeclaration;
     id: Identifier;
     init: Literal | Expression | null;
   }
 
   export interface VariableStatement {
-    type: "VariableStatement";
+    type: SyntaxKind.VariableStatement;
     declarations: VariableDeclaration[];
   }
 
@@ -63,28 +93,28 @@ export namespace ToyLang {
   //
 
   export interface Super {
-    type: "Super";
+    type: SyntaxKind.Super;
   }
 
   export interface NewExpression {
-    type: "NewExpression";
+    type: SyntaxKind.NewExpression;
     callee: MemberExpression;
     arguments: Arguments;
   }
 
   export interface ThisExpression {
-    type: "ThisExpression";
+    type: SyntaxKind.ThisExpression;
   }
 
   export type UnaryOperators = "+" | "-";
   export interface UnaryExpression {
-    type: "UnaryExpression";
+    type: SyntaxKind.UnaryExpression;
     operator: string;
     argument: CallExpression | CallMemberExpression | UnaryExpression;
   }
 
   export interface MemberExpression {
-    type: "MemberExpression";
+    type: SyntaxKind.MemberExpression;
     computed?: boolean;
     object: any;
     property: Identifier | Expression;
@@ -93,7 +123,7 @@ export namespace ToyLang {
   export type CallMemberExpression = MemberExpression | CallExpression;
 
   export interface CallExpression {
-    type: "CallExpression";
+    type: SyntaxKind.CallExpression;
     callee: MemberExpression;
     arguments: Arguments;
   }
@@ -107,14 +137,14 @@ export namespace ToyLang {
 
   export type AssignmentOperators = "=" | "+=" | "-=" | "/=" | "*=";
   export interface AssignmentExpression {
-    type: "AssignmentExpression";
+    type: SyntaxKind.AssignmentExpression;
     operator: AssignmentOperators;
     left: Identifier | LogicalExpression | BinaryExpression | Expression;
     right: Identifier | LogicalExpression | BinaryExpression | Expression;
   }
 
   export interface BinaryExpression {
-    type: "BinaryExpression";
+    type: SyntaxKind.BinaryExpression;
     operator: string;
     left:
       | LogicalExpression
@@ -131,7 +161,7 @@ export namespace ToyLang {
   }
 
   export interface LogicalExpression {
-    type: "LogicalExpression";
+    type: SyntaxKind.LogicalExpression;
     operator: string;
     left:
       | LogicalExpression
@@ -167,40 +197,40 @@ export namespace ToyLang {
   //
 
   export interface ExpressionStatement {
-    type: "ExpressionStatement";
+    type: SyntaxKind.ExpressionStatement;
     expression: Expression;
   }
 
   export interface ReturnStatement {
-    type: "ReturnStatement";
+    type: SyntaxKind.ReturnStatement;
     argument: Expression | null;
   }
 
   export interface EmptyStatement {
-    type: "EmptyStatement";
+    type: SyntaxKind.EmptyStatement;
   }
 
   export interface BlockStatement {
-    type: "BlockStatement";
+    type: SyntaxKind.BlockStatement;
     body: Statement[];
   }
 
   export interface FunctionStatement {
-    type: "FunctionDeclaration";
+    type: SyntaxKind.FunctionDeclaration;
     name: Identifier;
     body: BlockStatement;
     params: Identifier[] | null;
   }
 
   export interface IfStatement {
-    type: "IfStatement";
+    type: SyntaxKind.IfStatement;
     test: Literal | Identifier | Expression;
     consequent: Statement;
     alternate: Statement | null;
   }
 
   export interface ForStatement {
-    type: "ForStatement";
+    type: SyntaxKind.ForStatement;
     test: Expression | null;
     init: VariableStatement | Expression | null;
     update: Expression | null;
@@ -208,12 +238,12 @@ export namespace ToyLang {
   }
 
   export interface WhileStatement {
-    type: "WhileStatement";
+    type: SyntaxKind.WhileStatement;
     test: Expression;
     body: Statement;
   }
   export interface DoWhileStatement {
-    type: "DoWhileStatement";
+    type: SyntaxKind.DoWhileStatement;
     test: Expression;
     body: Statement;
   }

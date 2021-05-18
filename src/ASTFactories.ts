@@ -1,112 +1,108 @@
-import { ToyLang } from "./typings";
+import { tl } from "./typings";
 
 type ForParams = {
-  test: ToyLang.ForStatement["test"] | null;
-  init: ToyLang.ForStatement["init"] | null;
-  update: ToyLang.ForStatement["update"] | null;
-  body: ToyLang.ForStatement["body"];
+  test: tl.ForStatement["test"] | null;
+  init: tl.ForStatement["init"] | null;
+  update: tl.ForStatement["update"] | null;
+  body: tl.ForStatement["body"];
 };
-type ForReturn = ForParams & {
-  type: "ForStatement";
+type ForReturn = {
+  type: tl.SyntaxKind.ForStatement;
+  test: tl.ForStatement["test"] | null;
+  init: tl.ForStatement["init"] | null;
+  update: tl.ForStatement["update"] | null;
+  body: tl.ForStatement["body"];
 };
 
 export interface ASTFactory {
-  Program(body: ToyLang.Statement[]): ToyLang.Program;
-  EmptyStatement(): ToyLang.EmptyStatement;
-  BlockStatement(body: ToyLang.Statement[]): ToyLang.BlockStatement;
-  ExpressionStatement(
-    expression: ToyLang.Expression
-  ): ToyLang.ExpressionStatement;
+  Program(body: tl.Statement[]): tl.Program;
+  EmptyStatement(): tl.EmptyStatement;
+  BlockStatement(body: tl.Statement[]): tl.BlockStatement;
+  ExpressionStatement(expression: tl.Expression): tl.ExpressionStatement;
   IfStatement(
-    test: ToyLang.IfStatement["test"],
-    consequent: ToyLang.IfStatement["consequent"],
-    alternate: ToyLang.IfStatement["alternate"]
-  ): ToyLang.IfStatement;
+    test: tl.IfStatement["test"],
+    consequent: tl.IfStatement["consequent"],
+    alternate: tl.IfStatement["alternate"]
+  ): tl.IfStatement;
   ForStatement(props: ForParams): ForReturn;
-  ReturnStatement(argument: ToyLang.Expression | null): ToyLang.ReturnStatement;
-  WhileStatement(
-    test: ToyLang.Expression,
-    body: ToyLang.Statement
-  ): ToyLang.WhileStatement;
+  ReturnStatement(argument: tl.Expression | null): tl.ReturnStatement;
+  WhileStatement(test: tl.Expression, body: tl.Statement): tl.WhileStatement;
   DoWhileStatement(
-    test: ToyLang.Expression,
-    body: ToyLang.Statement
-  ): ToyLang.DoWhileStatement;
+    test: tl.Expression,
+    body: tl.Statement
+  ): tl.DoWhileStatement;
   VariableStatement(
-    declarations: ToyLang.VariableDeclaration[]
-  ): ToyLang.VariableStatement;
+    declarations: tl.VariableDeclaration[]
+  ): tl.VariableStatement;
 
   VariableDeclaration(
-    id: ToyLang.Identifier,
-    init: ToyLang.VariableDeclaration["init"]
-  ): ToyLang.VariableDeclaration;
+    id: tl.Identifier,
+    init: tl.VariableDeclaration["init"]
+  ): tl.VariableDeclaration;
   AssignmentExpression({
     operator,
     left,
     right,
-  }: Omit<ToyLang.AssignmentExpression, "type">): ToyLang.AssignmentExpression;
+  }: Omit<tl.AssignmentExpression, "type">): tl.AssignmentExpression;
   BinaryExpression(
     operator: string,
-    left: ToyLang.BinaryExpression["left"],
-    right: ToyLang.BinaryExpression["right"]
-  ): ToyLang.BinaryExpression;
+    left: tl.BinaryExpression["left"],
+    right: tl.BinaryExpression["right"]
+  ): tl.BinaryExpression;
   LogicalExpression(
     operator: string,
-    left: ToyLang.LogicalExpression["left"],
-    right: ToyLang.LogicalExpression["right"]
-  ): ToyLang.LogicalExpression;
-  Identifier(name: string): ToyLang.Identifier;
-  NullLiteral(): ToyLang.NullLiteral;
-  ThisExpression(): ToyLang.ThisExpression;
-  Super(): ToyLang.Super;
-  BooleanLiteral(value: boolean): ToyLang.BooleanLiteral;
-  StringLiteral(value: string): ToyLang.StringLiteral;
-  NumericLiteral(value: number): ToyLang.NumericLiteral;
+    left: tl.LogicalExpression["left"],
+    right: tl.LogicalExpression["right"]
+  ): tl.LogicalExpression;
+  Identifier(name: string): tl.Identifier;
+  NullLiteral(): tl.NullLiteral;
+  ThisExpression(): tl.ThisExpression;
+  Super(): tl.Super;
+  BooleanLiteral(value: boolean): tl.BooleanLiteral;
+  StringLiteral(value: string): tl.StringLiteral;
+  NumericLiteral(value: number): tl.NumericLiteral;
   NewExpression(
-    callee: ToyLang.MemberExpression,
-    args: ToyLang.Arguments
-  ): ToyLang.NewExpression;
+    callee: tl.MemberExpression,
+    args: tl.Arguments
+  ): tl.NewExpression;
   UnaryExpression(
     operator: string,
-    argument:
-      | ToyLang.CallExpression
-      | ToyLang.CallMemberExpression
-      | ToyLang.UnaryExpression
-  ): ToyLang.UnaryExpression;
+    argument: tl.CallExpression | tl.CallMemberExpression | tl.UnaryExpression
+  ): tl.UnaryExpression;
   ClassDeclaration(
-    id: ToyLang.Identifier,
-    body: ToyLang.BlockStatement,
-    superClass: ToyLang.Identifier | null
-  ): ToyLang.ClassDeclaration;
+    id: tl.Identifier,
+    body: tl.BlockStatement,
+    superClass: tl.Identifier | null
+  ): tl.ClassDeclaration;
   FunctionStatement(
-    name: ToyLang.Identifier,
-    body: ToyLang.BlockStatement,
-    params: ToyLang.Identifier[] | null
-  ): ToyLang.FunctionDeclaration;
+    name: tl.Identifier,
+    body: tl.BlockStatement,
+    params: tl.Identifier[] | null
+  ): tl.FunctionDeclaration;
 }
 
 export const DefaultASTFactory: ASTFactory = {
   Program(body) {
-    return { type: "Program", body };
+    return { type: tl.SyntaxKind.Program, body };
   },
   EmptyStatement() {
-    return { type: "EmptyStatement" };
+    return { type: tl.SyntaxKind.EmptyStatement };
   },
   BlockStatement(body) {
     return {
-      type: "BlockStatement",
+      type: tl.SyntaxKind.BlockStatement,
       body,
     };
   },
   ExpressionStatement(expression) {
     return {
-      type: "ExpressionStatement",
+      type: tl.SyntaxKind.ExpressionStatement,
       expression,
     };
   },
   IfStatement(test, consequent, alternate) {
     return {
-      type: "IfStatement",
+      type: tl.SyntaxKind.IfStatement,
       test,
       consequent,
       alternate,
@@ -114,27 +110,27 @@ export const DefaultASTFactory: ASTFactory = {
   },
   ReturnStatement(argument) {
     return {
-      type: "ReturnStatement",
+      type: tl.SyntaxKind.ReturnStatement,
       argument,
     };
   },
   WhileStatement(test, body) {
     return {
-      type: "WhileStatement",
+      type: tl.SyntaxKind.WhileStatement,
       test,
       body,
     };
   },
   DoWhileStatement(test, body) {
     return {
-      type: "DoWhileStatement",
+      type: tl.SyntaxKind.DoWhileStatement,
       test,
       body,
     };
   },
   ForStatement(props) {
     return {
-      type: "ForStatement",
+      type: tl.SyntaxKind.ForStatement,
       test: props.test,
       init: props.init,
       update: props.update,
@@ -143,20 +139,20 @@ export const DefaultASTFactory: ASTFactory = {
   },
   VariableStatement(declarations) {
     return {
-      type: "VariableStatement",
+      type: tl.SyntaxKind.VariableStatement,
       declarations,
     };
   },
   VariableDeclaration(id, init) {
     return {
-      type: "VariableDeclaration",
+      type: tl.SyntaxKind.VariableDeclaration,
       id,
       init,
     };
   },
   AssignmentExpression({ operator, left, right }) {
     return {
-      type: "AssignmentExpression",
+      type: tl.SyntaxKind.AssignmentExpression,
       operator,
       left,
       right,
@@ -164,7 +160,7 @@ export const DefaultASTFactory: ASTFactory = {
   },
   BinaryExpression(operator, left, right) {
     return {
-      type: "BinaryExpression",
+      type: tl.SyntaxKind.BinaryExpression,
       operator,
       left,
       right,
@@ -172,67 +168,67 @@ export const DefaultASTFactory: ASTFactory = {
   },
   LogicalExpression(operator, left, right) {
     return {
-      type: "LogicalExpression",
+      type: tl.SyntaxKind.LogicalExpression,
       operator,
       left,
       right,
     };
   },
   Identifier(name) {
-    return { type: "Identifier", name };
+    return { type: tl.SyntaxKind.Identifier, name };
   },
   NullLiteral() {
     return {
-      type: "NullLiteral",
+      type: tl.SyntaxKind.NullLiteral,
       value: null,
     };
   },
   BooleanLiteral(value) {
     return {
-      type: "BooleanLiteral",
+      type: tl.SyntaxKind.BooleanLiteral,
       value: value,
     };
   },
   StringLiteral(value) {
     return {
-      type: "StringLiteral",
+      type: tl.SyntaxKind.StringLiteral,
       value: value,
     };
   },
   NumericLiteral(value) {
     return {
-      type: "NumericLiteral",
+      type: tl.SyntaxKind.NumericLiteral,
       value,
     };
   },
   NewExpression(callee, args) {
     return {
-      type: "NewExpression",
+      type: tl.SyntaxKind.NewExpression,
       callee,
       arguments: args,
     };
   },
   UnaryExpression(operator, argument) {
     return {
-      type: "UnaryExpression",
+      type: tl.SyntaxKind.UnaryExpression,
       operator,
       argument,
     };
   },
   ThisExpression() {
     return {
-      type: "ThisExpression",
+      type: tl.SyntaxKind.ThisExpression,
     };
   },
   Super() {
     return {
-      type: "Super",
+      type: tl.SyntaxKind.Super,
     };
   },
 
   ClassDeclaration(id, body, superClass) {
     return {
-      type: "ClassDeclaration",
+      type: tl.SyntaxKind.ClassDeclaration,
       superClass,
       id,
       body,
@@ -240,7 +236,7 @@ export const DefaultASTFactory: ASTFactory = {
   },
   FunctionStatement(name, body, params) {
     return {
-      type: "FunctionDeclaration",
+      type: tl.SyntaxKind.FunctionDeclaration,
       name,
       body,
       params,
