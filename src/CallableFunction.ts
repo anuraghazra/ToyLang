@@ -1,7 +1,7 @@
 import { Interpreter } from "./Interpreter";
 import { Environment } from "./Environment";
 
-type NewArgs = {
+type CallableFunctionCreatorProps = {
   call: (...arg0: any[]) => any;
   arity: number;
   toString: (...args: any[]) => string;
@@ -9,12 +9,14 @@ type NewArgs = {
 
 export interface AbstractCallable {
   call(interpreter: Interpreter, args: any[]): void;
-  arity(): number;
-  toString(): string;
+  arity(...args: any[]): number;
+  toString(...args: any[]): string;
 }
 
 export class CallableFunction implements AbstractCallable {
-  call(interpreter: Interpreter, args: any[]) {}
+  call(interpreter: Interpreter, args: any[]) {
+    console.warn(`unimplemented function called`);
+  }
   arity() {
     return 0;
   }
@@ -22,7 +24,7 @@ export class CallableFunction implements AbstractCallable {
     return `<unimplemented fn>`;
   }
 
-  static new(obj: NewArgs) {
+  static new(obj: CallableFunctionCreatorProps) {
     return new (class CallableFunction {
       call(...args: any[]) {
         return obj.call(...args);

@@ -4,6 +4,7 @@ import { tl } from "./typings";
 import { CallableFunction, ToyLangFunction } from "./CallableFunction";
 import { RuntimeError } from "./RuntimeError";
 import { Return } from "./Return";
+import { stdlib } from "./StdLib";
 
 function checkNumberOperands(
   node: any,
@@ -29,43 +30,13 @@ export class Interpreter {
     this.ast = null;
     this.globals = new Environment();
 
-    this.globals.add(
-      "time",
-      CallableFunction.new({
-        arity: 0,
-        call() {
-          return +new Date() / 1000.0;
-        },
-        toString() {
-          return `<native fn>`;
-        },
-      })
-    );
-    this.globals.add(
-      "mod",
-      CallableFunction.new({
-        arity: 2,
-        call(_: any, args: number[]) {
-          return args[0] % args[1];
-        },
-        toString() {
-          return `<native fn>`;
-        },
-      })
-    );
-
-    this.globals.add(
-      "print",
-      CallableFunction.new({
-        arity: Infinity,
-        call(interpreter, args) {
-          console.log(...args);
-        },
-        toString() {
-          return `<native fn>`;
-        },
-      })
-    );
+    // Initialize standard library
+    Object.keys(stdlib).forEach((libName) => {
+      this.globals.add(
+        libName,
+        stdlib[libName as unknown as keyof typeof stdlib]
+      );
+    });
 
     this.environment = this.globals;
   }
