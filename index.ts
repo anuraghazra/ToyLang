@@ -32,18 +32,16 @@ const fizzBuzzSource = `
 `;
 
 const source = `
-  // calculate the factorial of a number
-  // 4's factorial = 1*2*3*4 
-  def factorial(n) {
-    let fac = 1;
-    for (let i = 1; i < n + 1; i +=1) {
-      fac *= i;
-    } 
-
-    return fac;
+let a = "global";
+{
+  def showA() {
+    print(a);
   }
-  
-  print("Factorial result:", factorial(6));
+
+  showA();
+  let a = "block";
+  showA();
+}
 `;
 
 const ast = parser.parse(source);

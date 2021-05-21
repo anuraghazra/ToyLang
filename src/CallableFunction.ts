@@ -37,15 +37,17 @@ export class CallableFunction implements AbstractCallable {
   }
 }
 
-export class MusketFunction extends CallableFunction {
+export class ToyLangFunction extends CallableFunction {
   declaration: any;
-  constructor(declaration: any) {
+  closure!: Environment;
+  constructor(declaration: any, closure: Environment) {
     super();
     this.declaration = declaration;
+    this.closure = closure;
   }
 
   call(interpreter: Interpreter, args: any[]) {
-    const environment = new Environment(interpreter.globals);
+    const environment = new Environment(this.closure);
     for (let i = 0; i < this.declaration.params.length; i++) {
       environment.add(this.declaration.params[i].name, args[i]);
     }

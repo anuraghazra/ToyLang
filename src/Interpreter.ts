@@ -1,7 +1,7 @@
 import { Environment } from "./Environment";
 import { tl } from "./typings";
 
-import { CallableFunction, MusketFunction } from "./CallableFunction";
+import { CallableFunction, ToyLangFunction } from "./CallableFunction";
 import { RuntimeError } from "./RuntimeError";
 import { Return } from "./Return";
 
@@ -186,7 +186,7 @@ export class Interpreter {
   }
 
   visitFunctionDeclaration(node: tl.FunctionDeclaration) {
-    let fun = new MusketFunction(node);
+    let fun = new ToyLangFunction(node, this.environment);
     this.environment.add(node.name.name, fun);
     return null;
   }
