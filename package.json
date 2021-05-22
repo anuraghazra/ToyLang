@@ -1,11 +1,17 @@
 {
-  "name": "parser-from-scratch",
+  "name": "toylang",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "license": "MIT",
   "scripts": {
     "test": "jest",
     "dev": "ts-node index",
+    "build": "tsc",
+    "prepublish": "tsc",
     "example": "ts-node examples/runner"
   },
   "devDependencies": {

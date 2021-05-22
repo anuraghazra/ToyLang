@@ -33,6 +33,26 @@ To run examples from [/examples](./examples) folder, you simply need to run:
 yarn example factorial
 ```
 
+## API Usage
+
+1. Install `toylang` package
+
+```sh
+npm install toylang
+```
+
+2. Use the package
+
+```js
+const { Parser, Interpreter } = require("toylang");
+
+const parser = new Parser();
+const interpreter = new Interpreter();
+
+const ast = parser.parse(`print(1+1);`);
+interpreter.execute(ast);
+```
+
 ## Scope of the project
 
 The scope of the project is only limited to educational purposes, the code itself is written for better understanding, rather than efficient or production use cases.
