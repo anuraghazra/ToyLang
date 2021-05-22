@@ -1,12 +1,13 @@
 {
   "name": "toylang",
   "version": "1.0.0",
+  "description": "A toy programming language built with TypeScript for learning purposes",
+  "homepage": "https://github.com/anuraghazra/ToyLang",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "files": [
     "dist"
   ],
-  "license": "MIT",
   "scripts": {
     "test": "jest",
     "dev": "ts-node index",
@@ -22,5 +23,25 @@
   "dependencies": {
     "@types/jest": "^26.0.23",
     "typescript": "^4.2.4"
-  }
+  },
+  "keywords": [
+    "toy",
+    "programming-language",
+    "parser",
+    "typescript",
+    "interpreter"
+  ],
+  "author": "Anurag Hazra <hazru.anurag@gmail.com>",
+  "license": "MIT",
+  "repository": "github:anuraghazra/ToyLang",
+  "bugs": {
+    "url": "https://github.com/anuraghazra/ToyLang/issues"
+  },
+  "funding": [
+    {
+      "type": "individual",
+      "url": "https://www.paypal.me/anuraghazra"
+    },
+    "https://www.buymeacoffee.com/anuraghazra"
+  ]
 }
