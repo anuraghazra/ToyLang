@@ -1,3 +1,4 @@
+// this file is only for testing
 import { Parser } from "./src/Parser";
 import { Interpreter } from "./src/Interpreter";
 
@@ -5,7 +6,7 @@ const parser = new Parser();
 const interpreter = new Interpreter();
 
 const fibonacciSource = `
-// Comments
+  // Comments
   def fib(n) {
     if (n <= 1) return n;
     return fib(n - 2) + fib(n - 1);

@@ -1,0 +1,12 @@
+def fizzBuzz(iter){
+  let str = '';
+  if(!(mod(iter, 3))) str += 'Fizz';
+  if(!(mod(iter, 5))) str += 'Buzz';
+
+  print(str || iter);
+
+  if(iter >= 100) return;
+
+  fizzBuzz(1 + iter);
+}
+fizzBuzz(1);

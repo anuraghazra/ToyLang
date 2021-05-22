@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "test": "jest",
-    "dev": "ts-node index"
+    "dev": "ts-node index",
+    "example": "ts-node examples/runner"
   },
   "devDependencies": {
     "jest": "^26.6.3",
