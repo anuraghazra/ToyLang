@@ -1,6 +1,6 @@
 {
   "name": "toylang",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A toy programming language built with TypeScript for learning purposes",
   "homepage": "https://github.com/anuraghazra/ToyLang",
   "main": "dist/index.js",
