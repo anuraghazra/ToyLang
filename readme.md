@@ -19,6 +19,9 @@ Here are few excellent resources I followed while building ToyLang.
 - "Let’s Build A Simple Interpreter" blogposts
   https://ruslanspivak.com/lsbasi-part1/
 
+- "The Super Tiny Compiler" by jamiebuilds
+  https://github.com/jamiebuilds/the-super-tiny-compiler
+
 ## Examples
 
 The syntax & semantics of the language is very similar to JavaScript with few differences.
