@@ -11,7 +11,7 @@ export function parseExpression(parser: Parser) {
   return parseAssignmentExpression(parser);
 }
 
-export function parsePrimaryExpression(parser: Parser) {
+export function parsePrimaryExpression(parser: Parser): tl.PrimaryExpression {
   if (isLiteral(parser.lookahead?.type)) {
     return parseLiteral(parser);
   }
@@ -152,6 +152,21 @@ export function parseMemberExpression(parser: Parser): tl.MemberExpression {
     if (parser.lookahead?.type === TokenTypes.DOT) {
       parser.eat(TokenTypes.DOT);
       const property = parseIdentifier(parser);
+
+      if (
+        object.type === tl.SyntaxKind.NumericLiteral &&
+        property.type === tl.SyntaxKind.Identifier
+      ) {
+        throw new ToyLangParserError({
+          message: `Identifier "${property.name}" is not valid after numeric literal`,
+          code: parser._string,
+          loc: {
+            start: parser.lookahead.start - 2,
+            end: parser.lookahead.end,
+          },
+        });
+      }
+
       object = {
         type: tl.SyntaxKind.MemberExpression,
         computed: false,

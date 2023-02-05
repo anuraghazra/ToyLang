@@ -37,9 +37,9 @@ class ToyLangParserError extends Error {
     const lineNum = `${chalk.green(`${line}`)}${vBar}`;
     const pointerPadding = `${" ".repeat(`${line}`.length)}${vBar}`;
     const pointerArrow =
-      pointerPadding + chalk.cyanBright(`${" ".repeat(Math.max(col, 0))}▲`);
+      pointerPadding + chalk.cyanBright(`${" ".repeat(Math.max(col - 1, 0))}▲`);
     const pointerBody = chalk.cyanBright(
-      `${col < 1 ? "│" : "┌"}${"─".repeat(Math.max(col - 1, 0))}${
+      `${col < 1 ? "│" : "┌"}${"─".repeat(Math.max(col - 2, 0))}${
         col < 1 ? "" : "╯"
       }`
     );

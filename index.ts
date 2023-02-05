@@ -37,16 +37,15 @@ const fizzBuzzSource = `
 // let a =
 // print(;);
 const source = dedent`
-let str = ";
-str += "Fizz";
+2.a;
 `;
 
-// const tok = new Tokenizer();
-// tok.init(source);
+const tok = new Tokenizer();
+tok.init(source);
 
-// while (tok.hasMoreTokens()) {
-  // console.log(tok.getNextToken());
-// }
+while (tok.hasMoreTokens()) {
+  console.log(tok.getNextToken());
+}
 
 const ast = parser.parse(source);
 
