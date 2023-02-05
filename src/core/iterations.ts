@@ -1,3 +1,4 @@
+import { ToyLangParserError } from "../ErrorReporter";
 import { Parser } from "../Parser";
 import { TokenTypes } from "../Tokenizer";
 import { parseExpression } from "./expression";
@@ -13,9 +14,15 @@ export function parseIterationStatement(parser: Parser) {
     case TokenTypes.for:
       return parseForStatement(parser);
   }
-  throw new SyntaxError(
-    `invalid IterationStatement: ${parser.lookahead?.type}`
-  );
+
+  throw new ToyLangParserError({
+    message: `invalid IterationStatement: ${parser.lookahead?.type}`,
+    code: parser._string,
+    loc: {
+      start: parser.lookahead?.start!,
+      end: parser.lookahead?.end!,
+    },
+  });
 }
 
 // `while` `(` expression `)` Statement
@@ -54,9 +61,7 @@ export function parseForStatement(parser: Parser) {
   parser.eat(TokenTypes.SEMI);
 
   const test =
-    parser.lookahead?.type !== TokenTypes.SEMI
-      ? parseExpression(parser)
-      : null;
+    parser.lookahead?.type !== TokenTypes.SEMI ? parseExpression(parser) : null;
   parser.eat(TokenTypes.SEMI);
 
   const update =

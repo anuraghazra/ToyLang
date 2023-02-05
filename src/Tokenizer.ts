@@ -101,8 +101,8 @@ const spec = [
   [/^!/, TokenTypes.LOGICAL_NOT],
 
   // Strings
-  [/^"[^"]*"/, TokenTypes.STRING],
-  [/^'[^']*'/, TokenTypes.STRING],
+  [/^"[^"\n]*"/, TokenTypes.STRING],
+  [/^'[^'\n]*'/, TokenTypes.STRING],
 ];
 
 export type Token = {
@@ -156,8 +156,11 @@ export class Tokenizer {
       };
     }
 
+    const isStringUnfinished = string[0] === '"' || string[0] === "'";
     throw new ToyLangParserError({
-      message: `Syntax Error: Unexpected token \`${string[0]}\``,
+      message: isStringUnfinished
+        ? `Syntax Error: Unterminated string literal`
+        : `Syntax Error: Unexpected token \`${string[0]}\``,
       code: this.string,
       loc: {
         start: this.cursor,

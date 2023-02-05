@@ -34,9 +34,11 @@ const fizzBuzzSource = `
   fizzBuzz(1);
 `;
 
-// let a = 
+// let a =
+// print(;);
 const source = dedent`
-print(;);
+let str = ";
+str += "Fizz";
 `;
 
 // const tok = new Tokenizer();

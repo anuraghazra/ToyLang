@@ -1,3 +1,4 @@
+import { ToyLangParserError } from "../ErrorReporter";
 import { Parser } from "../Parser";
 import { TokenTypes } from "../Tokenizer";
 import { tl } from "../typings";
@@ -27,7 +28,14 @@ export function parseLiteral(parser: Parser): tl.Literal {
       return parseNullLiteral(parser);
   }
 
-  throw new SyntaxError("Literal: Unexpected literal");
+  throw new ToyLangParserError({
+    message: "Literal: Unexpected literal",
+    code: parser._string,
+    loc: {
+      start: parser.lookahead?.start!,
+      end: parser.lookahead?.end!,
+    },
+  });
 }
 
 export function parseNullLiteral(parser: Parser) {
