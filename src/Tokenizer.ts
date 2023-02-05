@@ -36,6 +36,7 @@ export enum TokenTypes {
   LOGICAL_AND = "LOGICAL_AND",
   LOGICAL_OR = "LOGICAL_OR",
   LOGICAL_NOT = "LOGICAL_NOT",
+  EOF = "EOF",
 }
 
 const spec = [
@@ -105,18 +106,20 @@ const spec = [
 export type Token = {
   type: TokenTypes;
   value: string;
+  start: number;
+  end: number;
 };
 
 export class Tokenizer {
-  _string!: string;
-  _cursor!: number;
+  string!: string;
+  cursor!: number;
   init(string: string) {
-    this._string = string;
-    this._cursor = 0;
+    this.string = string;
+    this.cursor = 0;
   }
 
   hasMoreTokens() {
-    return this._cursor < this._string.length;
+    return this.cursor < this.string.length;
   }
 
   getNextToken(): Token | null {
@@ -124,7 +127,7 @@ export class Tokenizer {
       return null;
     }
 
-    const string = this._string.slice(this._cursor);
+    const string = this.string.slice(this.cursor);
 
     for (let [regex, type] of spec) {
       const tokenValue = this._match(regex as RegExp, string);
@@ -142,6 +145,8 @@ export class Tokenizer {
       return {
         type: type as TokenTypes,
         value: tokenValue,
+        start: this.cursor - (tokenValue.length + 1),
+        end: this.cursor - 1,
       };
     }
 
@@ -154,7 +159,7 @@ export class Tokenizer {
       return null;
     }
 
-    this._cursor += matched[0].length;
+    this.cursor += matched[0].length;
     return matched[0];
   }
 }

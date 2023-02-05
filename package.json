@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "test": "jest",
-    "dev": "ts-node index",
+    "dev": "ts-node --transpile-only index",
     "prebuild": "rimraf dist",
     "build": "tsc",
     "prepublish": "npm run build",
@@ -23,7 +23,11 @@
     "ts-node": "^9.1.1"
   },
   "dependencies": {
+    "@types/dedent": "^0.7.0",
     "@types/jest": "^26.0.23",
+    "cli-highlight": "^2.1.11",
+    "colors": "^1.4.0",
+    "dedent": "^0.7.0",
     "typescript": "^4.2.4"
   },
   "keywords": [
