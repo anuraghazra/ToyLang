@@ -21,6 +21,7 @@ export enum TokenTypes {
   PAREN_START = "PAREN_START",
   PAREN_END = "PAREN_END",
   COMMA = "COMMA",
+  COLON = "COLON",
   DOT = "DOT",
   BRACKET_END = "BRACKET_END",
   BRACKET_START = "BRACKET_START",
@@ -36,6 +37,7 @@ export enum TokenTypes {
   LOGICAL_AND = "LOGICAL_AND",
   LOGICAL_OR = "LOGICAL_OR",
   LOGICAL_NOT = "LOGICAL_NOT",
+  TYPE_KINDS = "TYPE_KINDS",
 }
 
 const spec = [
@@ -50,6 +52,7 @@ const spec = [
   [/^\(/, TokenTypes.PAREN_START],
   [/^\)/, TokenTypes.PAREN_END],
   [/^\,/, TokenTypes.COMMA],
+  [/^\:/, TokenTypes.COLON],
   [/^\./, TokenTypes.DOT],
   [/^\]/, TokenTypes.BRACKET_END],
   [/^\[/, TokenTypes.BRACKET_START],
@@ -71,6 +74,11 @@ const spec = [
   [/^\bthis\b/, TokenTypes.this],
   [/^\bsuper\b/, TokenTypes.super],
   [/^\bextends\b/, TokenTypes.extends],
+
+  // Type kinds
+  [/^\bnumber\b/, TokenTypes.TYPE_KINDS],
+  [/^\bstring\b/, TokenTypes.TYPE_KINDS],
+  [/^\bboolean\b/, TokenTypes.TYPE_KINDS],
 
   // Numbers
   [/^\d+/, TokenTypes.NUMBER],

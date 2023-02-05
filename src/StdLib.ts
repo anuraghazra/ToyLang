@@ -1,6 +1,7 @@
 import { CallableFunction } from "./CallableFunction";
 
 export const stdlib = {
+  CURRENT_TIME: Date.now(),
   time: CallableFunction.new({
     arity: 0,
     call() {

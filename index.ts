@@ -1,6 +1,7 @@
 // this file is only for testing
 import { Parser } from "./src/Parser";
 import { Interpreter } from "./src/Interpreter";
+import { TypeChecker } from "./src/TypeChecker";
 
 const parser = new Parser();
 const interpreter = new Interpreter();
@@ -36,7 +37,7 @@ const source = `
 let a = "global";
 {
   def showA() {
-    print(a);
+    print("Nice" + a);
   }
 
   showA();
@@ -45,8 +46,15 @@ let a = "global";
 }
 `;
 
-const ast = parser.parse(source);
+const simple = `
+1 + 2 * 3 + 1;
+`;
 
+const ast = parser.parse(simple);
+// const checker = new TypeChecker();
+// const checkerValue = checker.check(ast);
 const result = interpreter.execute(ast);
 
-// console.log(JSON.stringify(ast, null, 2));
+console.log(result);
+// console.log(checkerValue);
+console.log(JSON.stringify(ast, null, 2));

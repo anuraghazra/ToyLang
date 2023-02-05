@@ -1,5 +1,6 @@
 import { Parser } from "../Parser";
-import { TokenTypes } from "../Tokenizer";
+import { Token, TokenTypes } from "../Tokenizer";
+import { tl } from "../typings";
 import { parseAssignmentExpression } from "./expression";
 import { parseIdentifier } from "./identifiers";
 
@@ -33,13 +34,23 @@ export function parseVariableDeclarationList(parser: Parser) {
 // Identifier OptVariableInitializer
 export function parseVariableDeclaration(parser: Parser) {
   const id = parseIdentifier(parser);
+  let typeAnnotation = null;
+  if (parser._lookahead?.type === TokenTypes.COLON) {
+    parser._eat(TokenTypes.COLON);
+    // @ts-ignore
+    if (parser._lookahead?.type === TokenTypes.TYPE_KINDS) {
+      typeAnnotation = parser._lookahead?.value as tl.TypeKind;
+      parser._eat(TokenTypes.TYPE_KINDS);
+    }
+  }
+
   const init =
     parser._lookahead?.type !== TokenTypes.SEMI &&
     parser._lookahead?.type !== TokenTypes.COMMA
       ? parseVariableInitializer(parser)
       : null;
 
-  return parser.factory.VariableDeclaration(id, init);
+  return parser.factory.VariableDeclaration(id, init, typeAnnotation);
 }
 
 // SIMPLE_ASSIGNMENT AssignmentExpression

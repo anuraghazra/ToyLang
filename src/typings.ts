@@ -18,6 +18,7 @@ export namespace tl {
     ThisExpression = "ThisExpression",
     UnaryExpression = "UnaryExpression",
     MemberExpression = "MemberExpression",
+    TypeCastExpression = "TypeCastExpression",
     CallExpression = "CallExpression",
     AssignmentExpression = "AssignmentExpression",
     BinaryExpression = "BinaryExpression",
@@ -70,6 +71,12 @@ export namespace tl {
     body: BlockStatement;
   }
 
+  export interface TypeCastExpression {
+    type: SyntaxKind.TypeCastExpression;
+    expression: Expression;
+    typeAnnotation: tl.TypeKind;
+  }
+
   export interface FunctionDeclaration {
     type: SyntaxKind.FunctionDeclaration;
     name: Identifier;
@@ -80,6 +87,7 @@ export namespace tl {
   export interface VariableDeclaration {
     type: SyntaxKind.VariableDeclaration;
     id: Identifier;
+    typeAnnotation: TypeKind;
     init: Literal | Expression | null;
   }
 
@@ -177,20 +185,25 @@ export namespace tl {
       | Expression;
   }
 
-  // export type PrimaryExpression =
-  //   | NewExpression
-  //   | ThisExpression
-  //   | Identifier
-  //   | Literal
-  //   | Expression
-  //   | MemberExpression
-  //   | CallMemberExpression;
+  export type PrimaryExpression =
+    | Statement
+    | Expression
+    | UnaryExpression
+    | BinaryExpression
+    | CallExpression
+    | Program
+    | Literal
+    | Identifier
+    | TypeCastExpression
+    | VariableDeclaration;
 
   export type Expression =
     | CallExpression
     | AssignmentExpression
     | MemberExpression
-    | LogicalExpression;
+    | LogicalExpression
+    | UnaryExpression
+    | TypeCastExpression;
 
   //
   // Statements
@@ -263,4 +276,6 @@ export namespace tl {
     | EmptyStatement
     | BlockStatement
     | ExpressionStatement;
+
+  export type TypeKind = "string" | "number" | "boolean" | null;
 }

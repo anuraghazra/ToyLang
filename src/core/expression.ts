@@ -23,6 +23,14 @@ export function parsePrimaryExpression(parser: Parser) {
       return parseThisExpression(parser);
     case TokenTypes.new:
       return parseNewExpression(parser);
+    case TokenTypes.PAREN_START:
+      return parseParenthesizedExpression(parser);
+    case TokenTypes.IDENTIFIER:
+      return parseIdentifier(parser);
+    case TokenTypes.this:
+      return parseThisExpression(parser);
+    case TokenTypes.new:
+      return parseNewExpression(parser);
     default:
       return parseLeftHandSideExpression(parser);
   }
@@ -172,6 +180,17 @@ export function parseMemberExpression(parser: Parser): tl.MemberExpression {
 export function parseParenthesizedExpression(parser: Parser) {
   parser._eat(TokenTypes.PAREN_START);
   const expression = parseExpression(parser);
+
+  // (( Expression ) : Type)
+  let hasColon = parser._lookahead?.type === TokenTypes.COLON;
+
+  if (hasColon) {
+    parser._eat(TokenTypes.COLON);
+    const type = parser._eat(TokenTypes.TYPE_KINDS).value as tl.TypeKind;
+    parser._eat(TokenTypes.PAREN_END);
+    return parser.factory.TypeCastExpression(expression, type);
+  }
+
   parser._eat(TokenTypes.PAREN_END);
 
   return expression;
@@ -182,6 +201,7 @@ export function parseNewExpression(parser: Parser) {
 
   return parser.factory.NewExpression(
     parseMemberExpression(parser),
+    // @ts-ignore
     parseArguments(parser)
   );
 }

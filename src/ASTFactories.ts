@@ -6,6 +6,7 @@ type ForParams = {
   update: tl.ForStatement["update"] | null;
   body: tl.ForStatement["body"];
 };
+
 type ForReturn = {
   type: tl.SyntaxKind.ForStatement;
   test: tl.ForStatement["test"] | null;
@@ -37,7 +38,8 @@ export interface ASTFactory {
 
   VariableDeclaration(
     id: tl.Identifier,
-    init: tl.VariableDeclaration["init"]
+    init: tl.VariableDeclaration["init"],
+    typeAnnotation: tl.TypeKind
   ): tl.VariableDeclaration;
   AssignmentExpression({
     operator,
@@ -79,6 +81,10 @@ export interface ASTFactory {
     body: tl.BlockStatement,
     params: tl.Identifier[] | null
   ): tl.FunctionDeclaration;
+  TypeCastExpression(
+    expression: tl.Expression,
+    typeAnnotation: tl.TypeKind
+  ): tl.TypeCastExpression;
 }
 
 export const DefaultASTFactory: ASTFactory = {
@@ -143,11 +149,12 @@ export const DefaultASTFactory: ASTFactory = {
       declarations,
     };
   },
-  VariableDeclaration(id, init) {
+  VariableDeclaration(id, init, typeAnnotation) {
     return {
       type: tl.SyntaxKind.VariableDeclaration,
       id,
       init,
+      typeAnnotation,
     };
   },
   AssignmentExpression({ operator, left, right }) {
@@ -218,6 +225,13 @@ export const DefaultASTFactory: ASTFactory = {
   ThisExpression() {
     return {
       type: tl.SyntaxKind.ThisExpression,
+    };
+  },
+  TypeCastExpression(expression: tl.Expression, typeAnnotation: tl.TypeKind) {
+    return {
+      type: tl.SyntaxKind.TypeCastExpression,
+      typeAnnotation,
+      expression,
     };
   },
   Super() {

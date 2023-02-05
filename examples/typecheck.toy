@@ -1,0 +1,11 @@
+let a = 1;
+let b: number = 2;
+
+let c = a + b;
+
+// type casting
+let d = (c: string);
+
+let e = "Hello: " + d;
+
+print(e);

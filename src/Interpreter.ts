@@ -12,7 +12,6 @@ function checkNumberOperands(
   right: string | number
 ) {
   if (typeof left === "number" && typeof right === "number") return true;
-
   throw new RuntimeError("Operands must be numbers.", node);
 }
 
@@ -64,6 +63,8 @@ export class Interpreter {
     switch (node.type) {
       case "ExpressionStatement":
         return this.visitExpression(node);
+      case "TypeCastExpression":
+        return this.visitTypeCastExpression(node);
       case "IfStatement":
         return this.visitIfStatement(node);
       case "WhileStatement":
@@ -161,6 +162,7 @@ export class Interpreter {
     this.environment.add(node.name.name, fun);
     return null;
   }
+
   visitCallExpression(node: tl.CallExpression) {
     // this.printFunction(node);
     // calle should be MusketFunction.
@@ -275,16 +277,7 @@ export class Interpreter {
         return left != right;
 
       case "+":
-        if (typeof left === "number" && typeof right === "number") {
-          return left + right;
-        }
-        if (typeof left === "string" && typeof right === "string") {
-          return left + right;
-        }
-        throw new RuntimeError(
-          `Runtime: Mismatched type, cannot "${typeof left}" + "${typeof right}"`,
-          node
-        );
+        return left + right;
 
       case "-":
         checkNumberOperands(node, left, right);
@@ -364,6 +357,10 @@ export class Interpreter {
     }
 
     return null;
+  }
+
+  visitTypeCastExpression(node: tl.TypeCastExpression) {
+    return this.visit(node.expression);
   }
 
   visitProgram(node: tl.Program) {
