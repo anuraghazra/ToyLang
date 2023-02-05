@@ -1,3 +1,5 @@
+import { ToyLangParserError } from "./ErrorReporter";
+
 export enum TokenTypes {
   let = "let",
   if = "if",
@@ -114,7 +116,7 @@ export class Tokenizer {
   string!: string;
   cursor!: number;
   init(string: string) {
-    this.string = string;
+    this.string = string + "\n";
     this.cursor = 0;
   }
 
@@ -122,8 +124,12 @@ export class Tokenizer {
     return this.cursor < this.string.length;
   }
 
+  isEOF() {
+    return this.cursor === this.string.length;
+  }
+
   getNextToken(): Token | null {
-    if (!this.hasMoreTokens()) {
+    if (!this.hasMoreTokens() || this.isEOF()) {
       return null;
     }
 
@@ -145,12 +151,19 @@ export class Tokenizer {
       return {
         type: type as TokenTypes,
         value: tokenValue,
-        start: this.cursor - (tokenValue.length + 1),
-        end: this.cursor - 1,
+        start: this.cursor - tokenValue.length - 1,
+        end: this.cursor,
       };
     }
 
-    throw new SyntaxError(`Unexpected token: "${string[0]}"`);
+    throw new ToyLangParserError({
+      message: `Syntax Error: Unexpected token \`${string[0]}\``,
+      code: this.string,
+      loc: {
+        start: this.cursor,
+        end: this.cursor + 1,
+      },
+    });
   }
 
   _match(regex: RegExp, string: string) {

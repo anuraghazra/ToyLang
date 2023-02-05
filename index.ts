@@ -34,23 +34,20 @@ const fizzBuzzSource = `
   fizzBuzz(1);
 `;
 
+// let a = 
 const source = dedent`
-let a = "a";
-let b "b";
-
-print(a);
-print(b);
+print(;);
 `;
 
-const tok = new Tokenizer();
-tok.init(source);
+// const tok = new Tokenizer();
+// tok.init(source);
 
-while (tok.hasMoreTokens()) {
-  console.log(tok.getNextToken());
-}
+// while (tok.hasMoreTokens()) {
+  // console.log(tok.getNextToken());
+// }
 
 const ast = parser.parse(source);
 
-const result = interpreter.execute(ast);
+// const result = interpreter.execute(ast);
 
 console.log(JSON.stringify(ast, null, 2));

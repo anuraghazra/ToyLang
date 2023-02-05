@@ -1,5 +1,6 @@
+import { ToyLangParserError } from "../ErrorReporter";
 import { Parser } from "../Parser";
-import { TokenTypes } from "../Tokenizer";
+import { Token, TokenTypes } from "../Tokenizer";
 import { tl } from "../typings";
 import { parseLogicalORExpression } from "./binop";
 import { parseIdentifier, parseSuper } from "./identifiers";
@@ -38,7 +39,7 @@ export function parseAssignmentExpression(parser: Parser): tl.Expression {
 
   return parser.factory.AssignmentExpression({
     operator: parseAssignmentOperator(parser).value as tl.AssignmentOperators,
-    left: checkValidAssignmentTarget(left),
+    left: checkValidAssignmentTarget(left, parser, parser.lookahead!),
     right: parseAssignmentExpression(parser),
   });
 }
@@ -52,16 +53,22 @@ export function parseAssignmentOperator(parser: Parser) {
 
 export function checkValidAssignmentTarget<
   T extends tl.BinaryExpression["left"]
->(node: T) {
+>(node: T, parser: Parser, token: Token): T {
   if (
     node.type === tl.SyntaxKind.Identifier ||
     node.type === tl.SyntaxKind.MemberExpression
   ) {
     return node;
   }
-  throw new SyntaxError(
-    `Invalid left-hand side in assignment expression, expected "Identifier" but got "${node.type}"`
-  );
+
+  throw new ToyLangParserError({
+    message: `Invalid left-hand side in assignment expression, expected "Identifier" but got "${node.type}"`,
+    code: parser._string,
+    loc: {
+      start: token.start,
+      end: token.end,
+    },
+  });
 }
 
 export function isAssignmentOperator(type?: TokenTypes) {
