@@ -11,10 +11,10 @@ export function parseExpression(parser: Parser) {
 }
 
 export function parsePrimaryExpression(parser: Parser) {
-  if (isLiteral(parser._lookahead?.type)) {
+  if (isLiteral(parser.lookahead?.type)) {
     return parseLiteral(parser);
   }
-  switch (parser._lookahead?.type) {
+  switch (parser.lookahead?.type) {
     case TokenTypes.PAREN_START:
       return parseParenthesizedExpression(parser);
     case TokenTypes.IDENTIFIER:
@@ -32,7 +32,7 @@ export function parsePrimaryExpression(parser: Parser) {
 export function parseAssignmentExpression(parser: Parser): tl.Expression {
   let left = parseLogicalORExpression(parser);
 
-  if (!isAssignmentOperator(parser._lookahead?.type)) {
+  if (!isAssignmentOperator(parser.lookahead?.type)) {
     return left;
   }
 
@@ -44,10 +44,10 @@ export function parseAssignmentExpression(parser: Parser): tl.Expression {
 }
 
 export function parseAssignmentOperator(parser: Parser) {
-  if (parser._lookahead?.type === TokenTypes.SIMPLE_ASSIGNMENT) {
-    return parser._eat(TokenTypes.SIMPLE_ASSIGNMENT);
+  if (parser.lookahead?.type === TokenTypes.SIMPLE_ASSIGNMENT) {
+    return parser.eat(TokenTypes.SIMPLE_ASSIGNMENT);
   }
-  return parser._eat(TokenTypes.COMPLEX_ASSIGNMENT);
+  return parser.eat(TokenTypes.COMPLEX_ASSIGNMENT);
 }
 
 export function checkValidAssignmentTarget<
@@ -76,12 +76,12 @@ export function parseUnaryExpression(
 ): tl.CallExpression | tl.CallMemberExpression | tl.UnaryExpression {
   let operator;
 
-  switch (parser._lookahead?.type) {
+  switch (parser.lookahead?.type) {
     case TokenTypes.ADDITITIVE_OPERATOR:
-      operator = parser._eat(TokenTypes.ADDITITIVE_OPERATOR).value;
+      operator = parser.eat(TokenTypes.ADDITITIVE_OPERATOR).value;
       break;
     case TokenTypes.LOGICAL_NOT:
-      operator = parser._eat(TokenTypes.LOGICAL_NOT).value;
+      operator = parser.eat(TokenTypes.LOGICAL_NOT).value;
       break;
   }
 
@@ -102,13 +102,13 @@ export function parseLeftHandSideExpression(parser: Parser) {
 // | MemberExpression
 // | CallExpression
 export function parseCallMemberExpression(parser: Parser) {
-  if (parser._lookahead?.type === TokenTypes.super) {
+  if (parser.lookahead?.type === TokenTypes.super) {
     return parseCallExpression(parser, parseSuper(parser));
   }
 
   const member = parseMemberExpression(parser);
 
-  if (parser._lookahead?.type === TokenTypes.PAREN_START) {
+  if (parser.lookahead?.type === TokenTypes.PAREN_START) {
     return parseCallExpression(parser, member);
   }
 
@@ -125,7 +125,7 @@ export function parseCallExpression(
     arguments: parseArguments(parser),
   } as tl.CallExpression;
 
-  if (parser._lookahead?.type === TokenTypes.PAREN_START) {
+  if (parser.lookahead?.type === TokenTypes.PAREN_START) {
     callExpression = parseCallExpression(parser, callExpression);
   }
 
@@ -139,11 +139,11 @@ export function parseMemberExpression(parser: Parser): tl.MemberExpression {
   let object = parsePrimaryExpression(parser);
 
   while (
-    parser._lookahead?.type === TokenTypes.DOT ||
-    parser._lookahead?.type === TokenTypes.BRACKET_START
+    parser.lookahead?.type === TokenTypes.DOT ||
+    parser.lookahead?.type === TokenTypes.BRACKET_START
   ) {
-    if (parser._lookahead?.type === TokenTypes.DOT) {
-      parser._eat(TokenTypes.DOT);
+    if (parser.lookahead?.type === TokenTypes.DOT) {
+      parser.eat(TokenTypes.DOT);
       const property = parseIdentifier(parser);
       object = {
         type: tl.SyntaxKind.MemberExpression,
@@ -152,10 +152,10 @@ export function parseMemberExpression(parser: Parser): tl.MemberExpression {
         property,
       } as tl.MemberExpression;
     }
-    if (parser._lookahead?.type === TokenTypes.BRACKET_START) {
-      parser._eat(TokenTypes.BRACKET_START);
+    if (parser.lookahead?.type === TokenTypes.BRACKET_START) {
+      parser.eat(TokenTypes.BRACKET_START);
       const property = parseExpression(parser);
-      parser._eat(TokenTypes.BRACKET_END);
+      parser.eat(TokenTypes.BRACKET_END);
       object = {
         type: tl.SyntaxKind.MemberExpression,
         computed: true,
@@ -170,15 +170,15 @@ export function parseMemberExpression(parser: Parser): tl.MemberExpression {
 
 // ( Expression )
 export function parseParenthesizedExpression(parser: Parser) {
-  parser._eat(TokenTypes.PAREN_START);
+  parser.eat(TokenTypes.PAREN_START);
   const expression = parseExpression(parser);
-  parser._eat(TokenTypes.PAREN_END);
+  parser.eat(TokenTypes.PAREN_END);
 
   return expression;
 }
 
 export function parseNewExpression(parser: Parser) {
-  parser._eat(TokenTypes.new);
+  parser.eat(TokenTypes.new);
 
   return parser.factory.NewExpression(
     parseMemberExpression(parser),
@@ -187,6 +187,6 @@ export function parseNewExpression(parser: Parser) {
 }
 
 export function parseThisExpression(parser: Parser) {
-  parser._eat(TokenTypes.this);
+  parser.eat(TokenTypes.this);
   return parser.factory.ThisExpression();
 }

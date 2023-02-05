@@ -62,8 +62,8 @@ export function parse_BinaryExpression<T extends Function>(
 ): tl.BinaryExpression {
   let left = builder(parser);
 
-  while (parser._lookahead?.type === tokenType) {
-    const operator = parser._eat(tokenType).value;
+  while (parser.lookahead?.type === tokenType) {
+    const operator = parser.eat(tokenType).value;
 
     const right = builder(parser);
 
@@ -80,8 +80,8 @@ export function parse_LogicalExpression<T extends Function>(
 ): tl.LogicalExpression {
   let left = builder(parser);
 
-  while (parser._lookahead?.type === tokenType) {
-    const operator = parser._eat(tokenType).value;
+  while (parser.lookahead?.type === tokenType) {
+    const operator = parser.eat(tokenType).value;
 
     const right = builder(parser);
 

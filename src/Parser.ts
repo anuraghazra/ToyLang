@@ -1,4 +1,3 @@
-import { tl } from "./typings";
 import { Token, Tokenizer, TokenTypes } from "./Tokenizer";
 import { ASTFactory, DefaultASTFactory } from "./ASTFactories";
 import { parseStatementList } from "./core/statement";
@@ -6,7 +5,7 @@ import { parseStatementList } from "./core/statement";
 export class Parser {
   _string: string;
   _tokenizer: Tokenizer;
-  _lookahead!: Token | null;
+  lookahead!: Token | null;
   factory: ASTFactory;
 
   constructor(astFactory: ASTFactory = DefaultASTFactory) {
@@ -20,7 +19,7 @@ export class Parser {
     this._tokenizer.init(string);
 
     // prime the tokenizer by obtaining the first token (predictive parsing)
-    this._lookahead = this._tokenizer.getNextToken();
+    this.lookahead = this._tokenizer.getNextToken();
 
     return this.Program();
   }
@@ -29,8 +28,14 @@ export class Parser {
     return this.factory.Program(parseStatementList(this));
   }
 
-  _eat(tokenType: keyof typeof TokenTypes) {
-    const token = this._lookahead;
+  /**
+   * Consumes the next token if it matches the specified token type.
+   * And advances the lookahead token.
+   * 
+   * Returns the consumed token.
+   */
+  eat(tokenType: keyof typeof TokenTypes) {
+    const token = this.lookahead;
 
     if (token === null) {
       throw new SyntaxError(
@@ -44,7 +49,7 @@ export class Parser {
       );
     }
 
-    this._lookahead = this._tokenizer.getNextToken();
+    this.lookahead = this._tokenizer.getNextToken();
 
     return token;
   }

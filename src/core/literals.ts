@@ -14,7 +14,7 @@ export function isLiteral(tokenType?: TokenTypes) {
 }
 
 export function parseLiteral(parser: Parser): tl.Literal {
-  switch (parser._lookahead?.type) {
+  switch (parser.lookahead?.type) {
     case TokenTypes.NUMBER:
       return parseNumericLiteral(parser);
     case TokenTypes.STRING:
@@ -31,23 +31,23 @@ export function parseLiteral(parser: Parser): tl.Literal {
 }
 
 export function parseNullLiteral(parser: Parser) {
-  parser._eat(TokenTypes.null);
+  parser.eat(TokenTypes.null);
   return parser.factory.NullLiteral();
 }
 
 export function parseBooleanLiteral(parser: Parser, value: boolean) {
-  parser._eat(value ? TokenTypes.true : TokenTypes.false);
+  parser.eat(value ? TokenTypes.true : TokenTypes.false);
 
   return parser.factory.BooleanLiteral(value);
 }
 
 export function parseNumericLiteral(parser: Parser) {
-  const token = parser._eat(TokenTypes.NUMBER);
+  const token = parser.eat(TokenTypes.NUMBER);
 
   return parser.factory.NumericLiteral(Number(token.value));
 }
 
 export function parseStringLiteral(parser: Parser) {
-  const token = parser._eat(TokenTypes.STRING);
+  const token = parser.eat(TokenTypes.STRING);
   return parser.factory.StringLiteral(token.value.slice(1, -1));
 }
