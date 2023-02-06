@@ -74,10 +74,7 @@ export function parseFunctionStatement(parser: Parser) {
 export function parseStatementList(parser: Parser, stopLookhead?: TokenTypes) {
   const statementList = [parseStatement(parser)];
 
-  while (
-    parser.lookahead !== null &&
-    parser.lookahead?.type !== stopLookhead
-  ) {
+  while (parser.lookahead !== null && parser.lookahead?.type !== stopLookhead) {
     statementList.push(parseStatement(parser));
   }
 
@@ -147,9 +144,7 @@ export function parseReturnStatement(parser: Parser) {
   parser.eat(TokenTypes.return);
 
   const argument =
-    parser.lookahead?.type === TokenTypes.SEMI
-      ? null
-      : parseExpression(parser);
+    parser.lookahead?.type === TokenTypes.SEMI ? null : parseExpression(parser);
   parser.eat(TokenTypes.SEMI);
 
   return parser.factory.ReturnStatement(argument);

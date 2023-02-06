@@ -4,7 +4,9 @@ import { TokenTypes } from "../Tokenizer";
 import { tl } from "../typings";
 
 export function isLiteral(tokenType?: TokenTypes) {
-  if (!tokenType) throw Error("No token type provided");
+  if (!tokenType) {
+    return false;
+  }
   return [
     TokenTypes.NUMBER,
     TokenTypes.STRING,

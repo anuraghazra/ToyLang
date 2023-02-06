@@ -16,17 +16,39 @@ export function parsePrimaryExpression(parser: Parser): tl.PrimaryExpression {
     return parseLiteral(parser);
   }
   switch (parser.lookahead?.type) {
-    case TokenTypes.PAREN_START:
-      return parseParenthesizedExpression(parser);
     case TokenTypes.IDENTIFIER:
       return parseIdentifier(parser);
     case TokenTypes.this:
       return parseThisExpression(parser);
     case TokenTypes.new:
       return parseNewExpression(parser);
-    default:
-      return parseLeftHandSideExpression(parser);
+    case TokenTypes.PAREN_START:
+      return parseParenthesizedExpression(parser);
+    case TokenTypes.super:
+      return parseCallMemberExpression(parser);
   }
+
+  const expectations = [
+    TokenTypes.IDENTIFIER,
+    "ParenthesizedExpression",
+    TokenTypes.this,
+    TokenTypes.new,
+    TokenTypes.super,
+  ];
+
+  throw new ToyLangParserError({
+    message: parser.lookahead?.type
+      ? `Unexpected token "${
+          parser.lookahead?.type
+        }" expected "PrimaryExpression"
+        PrimaryExpression := ${expectations.join(" | ")}`
+      : "Unexpected end of input",
+    code: parser._string,
+    loc: {
+      start: parser.lookahead?.start!,
+      end: parser.lookahead?.end!,
+    },
+  });
 }
 
 // LefthandSideExpression ASSIGNMENT_OPERATOR AssignmentExpression

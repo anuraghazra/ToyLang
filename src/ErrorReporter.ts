@@ -67,7 +67,7 @@ function getLineAndColumnFromIndex(
   source: string,
   index: number | null = null
 ) {
-  if (index === null) throw new Error("No index provided");
+  if (index === null) index = source.length;
 
   let i = 0;
   let line = 1;
