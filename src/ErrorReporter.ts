@@ -9,21 +9,33 @@ type Loc = {
 
 class ToyLangParserError extends Error {
   constructor({
+    type,
     message,
     code,
     loc,
   }: {
-    message: string;
+    type: string;
+    message: string[];
     code: string;
     loc: Loc;
   }) {
     super();
-    this.message = ToyLangParserError.getFormattedError(message, code, loc);
+    this.message = ToyLangParserError.getFormattedError(
+      type,
+      message,
+      code,
+      loc
+    );
     this.name = "ToyLangParserError";
     this.stack = undefined;
   }
 
-  static getFormattedError(message: string, code: string, loc: Loc) {
+  static getFormattedError(
+    type = "",
+    message: string[],
+    code: string,
+    loc: Loc
+  ) {
     const { line, col } = getLineAndColumnFromIndex(code, loc!.start);
 
     const lineSource = highlight(code.split("\n")[line - 1], {
@@ -33,6 +45,12 @@ class ToyLangParserError extends Error {
 
     // TODO: Refactor
     const vBar = chalk.dim(" | ");
+    const titleLength = 50 - type.length - 2;
+    const title = `${
+      chalk.dim("─").repeat(titleLength / 2) +
+      ` ${type} ` +
+      chalk.dim("─".repeat(titleLength / 2))
+    }`;
     const separator = `${chalk.dim("─").repeat(50)}`;
     const lineNum = `${chalk.green(`${line}`)}${vBar}`;
     const pointerPadding = `${" ".repeat(`${line}`.length)}${vBar}`;
@@ -45,19 +63,21 @@ class ToyLangParserError extends Error {
     );
     const errorPointer = `${pointerPadding}${pointerBody}`;
 
-    const errorMessage = chalk.redBright(message);
+    const errorMessage = message
+      .map((msg) => chalk.redBright(msg))
+      .join(`\n${pointerPadding}${chalk.cyanBright("  | ")}`);
 
-    const formattedError = dedent`
-      \n
-      ${separator}
-      ${pointerPadding}
-      ${lineNum}${lineSource}
-      ${pointerArrow}
-      ${errorPointer}
-      ${pointerPadding}${chalk.cyanBright("╰─| ")}${errorMessage}
-      ${separator}
-      \n
-    `;
+    const formattedError = [
+      "\n",
+      title,
+      pointerPadding,
+      lineNum + lineSource,
+      pointerArrow,
+      errorPointer,
+      pointerPadding + chalk.cyanBright("╰─| ") + errorMessage,
+      separator,
+      "\n",
+    ].join("\n");
 
     return formattedError;
   }

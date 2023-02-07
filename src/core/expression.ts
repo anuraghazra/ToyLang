@@ -1,6 +1,5 @@
-import { ToyLangParserError } from "../ErrorReporter";
 import { Parser } from "../Parser";
-import { Token, Tokenizer, TokenTypes } from "../Tokenizer";
+import { Token, TokenTypes } from "../Tokenizer";
 import { tl } from "../typings";
 import { parseLogicalORExpression } from "./binop";
 import { parseIdentifier, parseSuper } from "./identifiers";
@@ -28,26 +27,21 @@ export function parsePrimaryExpression(parser: Parser): tl.PrimaryExpression {
       return parseLeftHandSideExpression(parser);
   }
 
-  const expectations = Tokenizer.tokenTypesToNames([
-    TokenTypes.IDENTIFIER,
-    TokenTypes.this,
-    TokenTypes.new,
-    TokenTypes.super,
-    "ParenthesizedExpression",
-  ]);
-
-  throw new ToyLangParserError({
-    message: parser.lookahead?.type
-      ? `Unexpected token "${Tokenizer.tokenTypeToName(
-          parser.lookahead?.value
-        )}" expected "PrimaryExpression"
-        PrimaryExpression := ${expectations.join(" | ")}`
-      : "Unexpected end of input",
-    code: parser._string,
-    loc: {
-      start: parser.lookahead?.start!,
-      end: parser.lookahead?.end!,
+  throw parser.panic({
+    type: "UnexpectedToken",
+    message: ({ got, expected }) => {
+      return [
+        `Unexpected token "${got}" expected "PrimaryExpression"`,
+        `PrimaryExpression := ${expected}`,
+      ];
     },
+    expected: [
+      TokenTypes.IDENTIFIER,
+      TokenTypes.this,
+      TokenTypes.new,
+      TokenTypes.super,
+      "ParenthesizedExpression",
+    ],
   });
 }
 
@@ -83,13 +77,14 @@ export function checkValidAssignmentTarget<
     return node;
   }
 
-  throw new ToyLangParserError({
-    message: `Invalid left-hand side in assignment expression, expected "Identifier" but got "${node.type}"`,
-    code: parser._string,
-    loc: {
-      start: token.start,
-      end: token.end,
+  throw parser.panic({
+    type: "InvalidAssignmentTarget",
+    message: ({ got, expected }) => {
+      return [
+        `Invalid left-hand side in assignment expression, expected "${expected}" but got "${got}"`,
+      ];
     },
+    expected: ["Identifier", "MemberExpression"],
   });
 }
 
@@ -179,12 +174,10 @@ export function parseMemberExpression(parser: Parser): tl.MemberExpression {
         object.type === tl.SyntaxKind.NumericLiteral &&
         property.type === tl.SyntaxKind.Identifier
       ) {
-        throw new ToyLangParserError({
-          message: `Identifier "${property.name}" is not valid after numeric literal`,
-          code: parser._string,
-          loc: {
-            start: parser.lookahead.start - 2,
-            end: parser.lookahead.end,
+        throw parser.panic({
+          type: "InvalidIdentifierAfterNumericLiteral",
+          message: ({ got }) => {
+            return [`Identifier "${got}" is not valid after numeric literal`];
           },
         });
       }

@@ -40,9 +40,12 @@ export class Parser {
 
     if (token === null) {
       throw new ToyLangParserError({
-        message: `Unexpected end of input: expected: "${Tokenizer.tokenTypeToName(
-          tokenType
-        )}"`,
+        type: "UnexpectedEndOfInput",
+        message: [
+          `Unexpected end of input: expected: "${Tokenizer.tokenTypeToName(
+            tokenType
+          )}"`,
+        ],
         code: this._string,
         loc: {
           start: this._string.length - 1,
@@ -53,9 +56,12 @@ export class Parser {
 
     if (token.type !== tokenType) {
       throw new ToyLangParserError({
-        message: `Unexpected token: "${Tokenizer.tokenTypeToName(
-          token.value
-        )}" expected: "${Tokenizer.tokenTypeToName(tokenType)}"`,
+        type: "UnexpectedToken",
+        message: [
+          `Unexpected token: "${Tokenizer.tokenTypeToName(
+            token.value
+          )}" expected: "${Tokenizer.tokenTypeToName(tokenType)}"`,
+        ],
         code: this._string,
         loc: {
           start: token.start,
@@ -67,6 +73,35 @@ export class Parser {
     this.lookahead = this._tokenizer.getNextToken();
 
     return token as Token & { type: T };
+  }
+
+  panic({
+    type,
+    expected,
+    message,
+  }: {
+    type: string;
+    expected?: string[];
+    message: ({
+      got,
+      expected,
+    }: {
+      got: string;
+      expected?: string;
+    }) => string[];
+  }) {
+    throw new ToyLangParserError({
+      type,
+      message: message({
+        got: Tokenizer.tokenTypeToName(this.lookahead?.type || ""),
+        expected: expected?.join(" | "),
+      }),
+      code: this._string,
+      loc: {
+        start: this.lookahead?.start!,
+        end: this.lookahead?.end!,
+      },
+    });
   }
 }
 
