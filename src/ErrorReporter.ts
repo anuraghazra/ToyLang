@@ -46,22 +46,18 @@ class ToyLangParserError extends Error {
     // TODO: Refactor
     const vBar = chalk.dim(" | ");
     const titleLength = 50 - type.length - 2;
-    const title = `${
-      chalk.dim("─").repeat(titleLength / 2) +
-      ` ${type} ` +
-      chalk.dim("─".repeat(titleLength / 2))
-    }`;
-    const separator = `${chalk.dim("─").repeat(50)}`;
-    const lineNum = `${chalk.green(`${line}`)}${vBar}`;
-    const pointerPadding = `${" ".repeat(`${line}`.length)}${vBar}`;
-    const pointerArrow =
-      pointerPadding + chalk.cyanBright(`${" ".repeat(Math.max(col - 1, 0))}▲`);
+    const title = chalk.dim(
+      "─".repeat(titleLength / 2) + ` ${type} ` + "─".repeat(titleLength / 2)
+    );
+    const separator = chalk.dim("─".repeat(50));
+    const lineNum = chalk.green(line) + vBar;
+    const pointerPadding = " ".repeat(line.toString().length) + vBar;
+    const pointerArrow = chalk.cyanBright(" ".repeat(Math.max(col - 1, 0)) + "▲");
     const pointerBody = chalk.cyanBright(
-      `${col < 1 ? "│" : "┌"}${"─".repeat(Math.max(col - 2, 0))}${
-        col < 1 ? "" : "╯"
+      `${col <= 1 ? "│" : "┌"}${"─".repeat(Math.max(col - 2, 0))}${
+        col <= 1 ? "" : "╯"
       }`
     );
-    const errorPointer = `${pointerPadding}${pointerBody}`;
 
     const errorMessage = message
       .map((msg) => chalk.redBright(msg))
@@ -72,8 +68,8 @@ class ToyLangParserError extends Error {
       title,
       pointerPadding,
       lineNum + lineSource,
-      pointerArrow,
-      errorPointer,
+      pointerPadding + pointerArrow,
+      pointerPadding + pointerBody,
       pointerPadding + chalk.cyanBright("╰─| ") + errorMessage,
       separator,
       "\n",

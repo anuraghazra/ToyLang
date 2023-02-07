@@ -158,9 +158,12 @@ export class Tokenizer {
 
     const isStringUnfinished = string[0] === '"' || string[0] === "'";
     throw new ToyLangParserError({
-      message: isStringUnfinished
-        ? `Syntax Error: Unterminated string literal`
-        : `Syntax Error: Unexpected token \`${string[0]}\``,
+      type: "SyntaxError",
+      message: [
+        isStringUnfinished
+          ? `Unterminated string literal`
+          : `Invalid token: "${string[0]}"`,
+      ],
       code: this.string,
       loc: {
         start: this.cursor,
