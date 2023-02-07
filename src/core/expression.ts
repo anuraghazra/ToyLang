@@ -39,7 +39,7 @@ export function parsePrimaryExpression(parser: Parser): tl.PrimaryExpression {
   throw new ToyLangParserError({
     message: parser.lookahead?.type
       ? `Unexpected token "${Tokenizer.tokenTypeToName(
-          parser.lookahead?.type
+          parser.lookahead?.value
         )}" expected "PrimaryExpression"
         PrimaryExpression := ${expectations.join(" | ")}`
       : "Unexpected end of input",
