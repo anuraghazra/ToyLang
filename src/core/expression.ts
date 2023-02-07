@@ -1,6 +1,6 @@
 import { ToyLangParserError } from "../ErrorReporter";
 import { Parser } from "../Parser";
-import { Token, TokenTypes } from "../Tokenizer";
+import { Token, Tokenizer, TokenTypes } from "../Tokenizer";
 import { tl } from "../typings";
 import { parseLogicalORExpression } from "./binop";
 import { parseIdentifier, parseSuper } from "./identifiers";
@@ -25,22 +25,22 @@ export function parsePrimaryExpression(parser: Parser): tl.PrimaryExpression {
     case TokenTypes.PAREN_START:
       return parseParenthesizedExpression(parser);
     case TokenTypes.super:
-      return parseCallMemberExpression(parser);
+      return parseLeftHandSideExpression(parser);
   }
 
-  const expectations = [
+  const expectations = Tokenizer.tokenTypesToNames([
     TokenTypes.IDENTIFIER,
-    "ParenthesizedExpression",
     TokenTypes.this,
     TokenTypes.new,
     TokenTypes.super,
-  ];
+    "ParenthesizedExpression",
+  ]);
 
   throw new ToyLangParserError({
     message: parser.lookahead?.type
-      ? `Unexpected token "${
+      ? `Unexpected token "${Tokenizer.tokenTypeToName(
           parser.lookahead?.type
-        }" expected "PrimaryExpression"
+        )}" expected "PrimaryExpression"
         PrimaryExpression := ${expectations.join(" | ")}`
       : "Unexpected end of input",
     code: parser._string,

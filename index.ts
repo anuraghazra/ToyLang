@@ -34,10 +34,8 @@ const fizzBuzzSource = `
   fizzBuzz(1);
 `;
 
-// let a =
-// print(;);
 const source = dedent`
-2.a;
+if (a >= 1) {!this};
 `;
 
 const tok = new Tokenizer();

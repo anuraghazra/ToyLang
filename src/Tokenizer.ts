@@ -178,4 +178,39 @@ export class Tokenizer {
     this.cursor += matched[0].length;
     return matched[0];
   }
+
+  static tokenTypeToName(type: string) {
+    const nameMap = {
+      [TokenTypes.SEMI]: ";",
+      [TokenTypes.IDENTIFIER]: "Identifier",
+      [TokenTypes.PAREN_END]: ")",
+      [TokenTypes.PAREN_START]: "(",
+      [TokenTypes.ADDITITIVE_OPERATOR]: "+",
+      [TokenTypes.MULTIPLICATIVE_OPERATOR]: "*",
+      [TokenTypes.NUMBER]: "Number",
+      [TokenTypes.STRING]: "String",
+      [TokenTypes.CURLY_START]: "{",
+      [TokenTypes.CURLY_END]: "}",
+      [TokenTypes.COMMA]: ",",
+      [TokenTypes.DOT]: ".",
+      [TokenTypes.BRACKET_START]: "[",
+      [TokenTypes.BRACKET_END]: "]",
+      [TokenTypes.EQUALITY_OPERATOR]: "== | !=",
+      [TokenTypes.SIMPLE_ASSIGNMENT]: "=",
+      [TokenTypes.COMPLEX_ASSIGNMENT]: "+= | -= | *= | /=",
+      [TokenTypes.RELATIONAL_OPERATOR]: "< | > | <= | >=",
+      [TokenTypes.LOGICAL_AND]: "&&",
+      [TokenTypes.LOGICAL_OR]: "||",
+      [TokenTypes.LOGICAL_NOT]: "!",
+      ParenthesizedExpression: "( Expression )",
+    };
+
+    return nameMap?.[type as unknown as keyof typeof nameMap] || type;
+  }
+
+  static tokenTypesToNames(types: string[]) {
+    return types.map((type) => {
+      return this.tokenTypeToName(type);
+    });
+  }
 }

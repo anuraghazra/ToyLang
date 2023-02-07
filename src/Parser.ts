@@ -40,7 +40,9 @@ export class Parser {
 
     if (token === null) {
       throw new ToyLangParserError({
-        message: `Unexpected end of input: expected: "${tokenType}"`,
+        message: `Unexpected end of input: expected: "${Tokenizer.tokenTypeToName(
+          tokenType
+        )}"`,
         code: this._string,
         loc: {
           start: this._string.length - 1,
@@ -51,7 +53,9 @@ export class Parser {
 
     if (token.type !== tokenType) {
       throw new ToyLangParserError({
-        message: `Unexpected token: "${token.value}" expected: "${tokenType}"`,
+        message: `Unexpected token: "${Tokenizer.tokenTypeToName(
+          token.value
+        )}" expected: "${Tokenizer.tokenTypeToName(tokenType)}"`,
         code: this._string,
         loc: {
           start: token.start,
