@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { Interpreter } from "../src/Interpreter";
+import { Interpreter } from "../src/interpreter/Interpreter";
 import { Parser } from "../src/Parser";
 
 const args = process.argv.slice(2);

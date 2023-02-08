@@ -30,13 +30,9 @@ export function parseLiteral(parser: Parser): tl.Literal {
       return parseNullLiteral(parser);
   }
 
-  throw new ToyLangParserError({
-    message: "Literal: Unexpected literal",
-    code: parser._string,
-    loc: {
-      start: parser.lookahead?.start!,
-      end: parser.lookahead?.end!,
-    },
+  throw parser.panic({
+    type: "SyntaxError",
+    message: () => ["Unexpected token"],
   });
 }
 

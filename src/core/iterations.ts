@@ -15,13 +15,9 @@ export function parseIterationStatement(parser: Parser) {
       return parseForStatement(parser);
   }
 
-  throw new ToyLangParserError({
-    message: `invalid IterationStatement: ${parser.lookahead?.type}`,
-    code: parser._string,
-    loc: {
-      start: parser.lookahead?.start!,
-      end: parser.lookahead?.end!,
-    },
+  throw parser.panic({
+    type: "SyntaxError",
+    message: ({ got }) => [`invalid IterationStatement: ${got}`],
   });
 }
 
