@@ -8,7 +8,7 @@ import { parseIterationStatement } from "./iterations";
 import { parseVariableStatement } from "./variable";
 
 export function parseStatement(parser: Parser): tl.Statement {
-  switch (parser._lookahead?.type) {
+  switch (parser.lookahead?.type) {
     case TokenTypes.let:
       return parseVariableStatement(parser);
     case TokenTypes.if:
@@ -34,37 +34,37 @@ export function parseStatement(parser: Parser): tl.Statement {
 
 export function parseExpressionStatement(parser: Parser) {
   const expression = parseExpression(parser);
-  parser._eat(TokenTypes.SEMI);
+  parser.eat(TokenTypes.SEMI);
 
   return parser.factory.ExpressionStatement(expression);
 }
 
 export function parseBlockStatement(parser: Parser) {
   // { OptStatementList }
-  parser._eat(TokenTypes.CURLY_START);
+  parser.eat(TokenTypes.CURLY_START);
 
   const body =
-    parser._lookahead?.type !== TokenTypes.CURLY_END
+    parser.lookahead?.type !== TokenTypes.CURLY_END
       ? parseStatementList(parser, TokenTypes.CURLY_END)
       : [];
 
-  parser._eat(TokenTypes.CURLY_END);
+  parser.eat(TokenTypes.CURLY_END);
 
   return parser.factory.BlockStatement(body);
 }
 
 // `def` Identifier `(` OptFunctionArguments `)` BlockStatement
 export function parseFunctionStatement(parser: Parser) {
-  parser._eat(TokenTypes.def);
+  parser.eat(TokenTypes.def);
   const name = parseIdentifier(parser);
-  parser._eat(TokenTypes.PAREN_START);
+  parser.eat(TokenTypes.PAREN_START);
 
   const params =
-    parser._lookahead?.type === TokenTypes.PAREN_END
+    parser.lookahead?.type === TokenTypes.PAREN_END
       ? []
       : parseFunctionArguments(parser);
 
-  parser._eat(TokenTypes.PAREN_END);
+  parser.eat(TokenTypes.PAREN_END);
 
   const body = parseBlockStatement(parser);
 
@@ -74,10 +74,7 @@ export function parseFunctionStatement(parser: Parser) {
 export function parseStatementList(parser: Parser, stopLookhead?: TokenTypes) {
   const statementList = [parseStatement(parser)];
 
-  while (
-    parser._lookahead !== null &&
-    parser._lookahead?.type !== stopLookhead
-  ) {
+  while (parser.lookahead !== null && parser.lookahead?.type !== stopLookhead) {
     statementList.push(parseStatement(parser));
   }
 
@@ -87,15 +84,15 @@ export function parseStatementList(parser: Parser, stopLookhead?: TokenTypes) {
 // `if` `(` Expression `)` Statement
 // `if` `(` Expression `)` Statement `else` Statement
 export function parseIfStatement(parser: Parser) {
-  parser._eat(TokenTypes.if);
-  parser._eat(TokenTypes.PAREN_START);
+  parser.eat(TokenTypes.if);
+  parser.eat(TokenTypes.PAREN_START);
   const expression = parseExpression(parser);
-  parser._eat(TokenTypes.PAREN_END);
+  parser.eat(TokenTypes.PAREN_END);
   const statement = parseStatement(parser);
 
   let alternate = null;
-  if (parser._lookahead?.type === TokenTypes.else) {
-    parser._eat(TokenTypes.else);
+  if (parser.lookahead?.type === TokenTypes.else) {
+    parser.eat(TokenTypes.else);
     alternate = parseStatement(parser);
   }
 
@@ -104,14 +101,14 @@ export function parseIfStatement(parser: Parser) {
 
 // `(` OptArgumentList `)`
 export function parseArguments(parser: Parser) {
-  parser._eat(TokenTypes.PAREN_START);
+  parser.eat(TokenTypes.PAREN_START);
 
   const argumentList =
-    parser._lookahead?.type === TokenTypes.PAREN_END
+    parser.lookahead?.type === TokenTypes.PAREN_END
       ? []
       : parseArgumentList(parser);
 
-  parser._eat(TokenTypes.PAREN_END);
+  parser.eat(TokenTypes.PAREN_END);
 
   return argumentList;
 }
@@ -123,8 +120,8 @@ export function parseArgumentList(parser: Parser) {
   do {
     argumentList.push(parseAssignmentExpression(parser));
   } while (
-    parser._lookahead?.type === TokenTypes.COMMA &&
-    parser._eat(TokenTypes.COMMA)
+    parser.lookahead?.type === TokenTypes.COMMA &&
+    parser.eat(TokenTypes.COMMA)
   );
 
   return argumentList;
@@ -136,26 +133,24 @@ export function parseFunctionArguments(parser: Parser) {
   do {
     params.push(parseIdentifier(parser));
   } while (
-    parser._lookahead?.type === TokenTypes.COMMA &&
-    parser._eat(TokenTypes.COMMA)
+    parser.lookahead?.type === TokenTypes.COMMA &&
+    parser.eat(TokenTypes.COMMA)
   );
 
   return params;
 }
 
 export function parseReturnStatement(parser: Parser) {
-  parser._eat(TokenTypes.return);
+  parser.eat(TokenTypes.return);
 
   const argument =
-    parser._lookahead?.type === TokenTypes.SEMI
-      ? null
-      : parseExpression(parser);
-  parser._eat(TokenTypes.SEMI);
+    parser.lookahead?.type === TokenTypes.SEMI ? null : parseExpression(parser);
+  parser.eat(TokenTypes.SEMI);
 
   return parser.factory.ReturnStatement(argument);
 }
 
 export function parseEmptyStatement(parser: Parser) {
-  parser._eat(TokenTypes.SEMI);
+  parser.eat(TokenTypes.SEMI);
   return parser.factory.EmptyStatement();
 }

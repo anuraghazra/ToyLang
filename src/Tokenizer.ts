@@ -1,3 +1,5 @@
+import { ToyLangParserError } from "./ErrorReporter";
+
 export enum TokenTypes {
   let = "let",
   if = "if",
@@ -36,6 +38,7 @@ export enum TokenTypes {
   LOGICAL_AND = "LOGICAL_AND",
   LOGICAL_OR = "LOGICAL_OR",
   LOGICAL_NOT = "LOGICAL_NOT",
+  EOF = "EOF",
 }
 
 const spec = [
@@ -98,33 +101,39 @@ const spec = [
   [/^!/, TokenTypes.LOGICAL_NOT],
 
   // Strings
-  [/^"[^"]*"/, TokenTypes.STRING],
-  [/^'[^']*'/, TokenTypes.STRING],
+  [/^"[^"\n]*"/, TokenTypes.STRING],
+  [/^'[^'\n]*'/, TokenTypes.STRING],
 ];
 
 export type Token = {
   type: TokenTypes;
   value: string;
+  start: number;
+  end: number;
 };
 
 export class Tokenizer {
-  _string!: string;
-  _cursor!: number;
+  string!: string;
+  cursor!: number;
   init(string: string) {
-    this._string = string;
-    this._cursor = 0;
+    this.string = string + "\n";
+    this.cursor = 0;
   }
 
   hasMoreTokens() {
-    return this._cursor < this._string.length;
+    return this.cursor < this.string.length;
+  }
+
+  isEOF() {
+    return this.cursor === this.string.length;
   }
 
   getNextToken(): Token | null {
-    if (!this.hasMoreTokens()) {
+    if (!this.hasMoreTokens() || this.isEOF()) {
       return null;
     }
 
-    const string = this._string.slice(this._cursor);
+    const string = this.string.slice(this.cursor);
 
     for (let [regex, type] of spec) {
       const tokenValue = this._match(regex as RegExp, string);
@@ -142,10 +151,25 @@ export class Tokenizer {
       return {
         type: type as TokenTypes,
         value: tokenValue,
+        start: this.cursor - tokenValue.length - 1,
+        end: this.cursor,
       };
     }
 
-    throw new SyntaxError(`Unexpected token: "${string[0]}"`);
+    const isStringUnfinished = string[0] === '"' || string[0] === "'";
+    throw new ToyLangParserError({
+      type: "SyntaxError",
+      message: [
+        isStringUnfinished
+          ? `Unterminated string literal`
+          : `Invalid token: "${string[0]}"`,
+      ],
+      code: this.string,
+      loc: {
+        start: this.cursor,
+        end: this.cursor + 1,
+      },
+    });
   }
 
   _match(regex: RegExp, string: string) {
@@ -154,7 +178,42 @@ export class Tokenizer {
       return null;
     }
 
-    this._cursor += matched[0].length;
+    this.cursor += matched[0].length;
     return matched[0];
+  }
+
+  static tokenTypeToName(type: string) {
+    const nameMap = {
+      [TokenTypes.SEMI]: ";",
+      [TokenTypes.IDENTIFIER]: "Identifier",
+      [TokenTypes.PAREN_END]: ")",
+      [TokenTypes.PAREN_START]: "(",
+      [TokenTypes.ADDITITIVE_OPERATOR]: "+",
+      [TokenTypes.MULTIPLICATIVE_OPERATOR]: "*",
+      [TokenTypes.NUMBER]: "Number",
+      [TokenTypes.STRING]: "String",
+      [TokenTypes.CURLY_START]: "{",
+      [TokenTypes.CURLY_END]: "}",
+      [TokenTypes.COMMA]: ",",
+      [TokenTypes.DOT]: ".",
+      [TokenTypes.BRACKET_START]: "[",
+      [TokenTypes.BRACKET_END]: "]",
+      [TokenTypes.EQUALITY_OPERATOR]: "== | !=",
+      [TokenTypes.SIMPLE_ASSIGNMENT]: "=",
+      [TokenTypes.COMPLEX_ASSIGNMENT]: "+= | -= | *= | /=",
+      [TokenTypes.RELATIONAL_OPERATOR]: "< | > | <= | >=",
+      [TokenTypes.LOGICAL_AND]: "&&",
+      [TokenTypes.LOGICAL_OR]: "||",
+      [TokenTypes.LOGICAL_NOT]: "!",
+      ParenthesizedExpression: "( Expression )",
+    };
+
+    return nameMap?.[type as unknown as keyof typeof nameMap] || type;
+  }
+
+  static tokenTypesToNames(types: string[]) {
+    return types.map((type) => {
+      return this.tokenTypeToName(type);
+    });
   }
 }

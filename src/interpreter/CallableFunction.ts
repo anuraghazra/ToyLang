@@ -56,6 +56,7 @@ export class ToyLangFunction extends CallableFunction {
     try {
       interpreter.executeBlock(this.declaration.body.body, environment);
     } catch (returnValue /* instanceof `Return` */) {
+      // @ts-ignore returnValue is unknown
       return returnValue.value;
     }
     return null;

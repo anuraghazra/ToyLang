@@ -1,5 +1,5 @@
 import { Environment } from "./Environment";
-import { tl } from "./typings";
+import { tl } from "../typings";
 
 import { CallableFunction, ToyLangFunction } from "./CallableFunction";
 import { RuntimeError } from "./RuntimeError";

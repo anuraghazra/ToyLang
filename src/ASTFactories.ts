@@ -6,6 +6,7 @@ type ForParams = {
   update: tl.ForStatement["update"] | null;
   body: tl.ForStatement["body"];
 };
+
 type ForReturn = {
   type: tl.SyntaxKind.ForStatement;
   test: tl.ForStatement["test"] | null;

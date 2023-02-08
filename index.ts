@@ -1,6 +1,8 @@
 // this file is only for testing
 import { Parser } from "./src/Parser";
-import { Interpreter } from "./src/Interpreter";
+import { Interpreter } from "./src/interpreter/Interpreter";
+import { Tokenizer } from "./src/Tokenizer";
+import dedent from "dedent";
 
 const parser = new Parser();
 const interpreter = new Interpreter();
@@ -32,21 +34,19 @@ const fizzBuzzSource = `
   fizzBuzz(1);
 `;
 
-const source = `
-let a = "global";
-{
-  def showA() {
-    print(a);
-  }
-
-  showA();
-  let a = "block";
-  showA();
-}
+const source = dedent`
+if (a >= 1) {!this};
 `;
+
+const tok = new Tokenizer();
+tok.init(source);
+
+while (tok.hasMoreTokens()) {
+  console.log(tok.getNextToken());
+}
 
 const ast = parser.parse(source);
 
-const result = interpreter.execute(ast);
+// const result = interpreter.execute(ast);
 
-// console.log(JSON.stringify(ast, null, 2));
+console.log(JSON.stringify(ast, null, 2));

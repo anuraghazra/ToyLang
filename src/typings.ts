@@ -91,7 +91,6 @@ export namespace tl {
   //
   // Expressions
   //
-
   export interface Super {
     type: SyntaxKind.Super;
   }
@@ -177,14 +176,14 @@ export namespace tl {
       | Expression;
   }
 
-  // export type PrimaryExpression =
-  //   | NewExpression
-  //   | ThisExpression
-  //   | Identifier
-  //   | Literal
-  //   | Expression
-  //   | MemberExpression
-  //   | CallMemberExpression;
+  export type PrimaryExpression =
+    | Literal
+    | Identifier
+    | Expression
+    | NewExpression
+    | ThisExpression
+    | MemberExpression
+    | CallMemberExpression;
 
   export type Expression =
     | CallExpression

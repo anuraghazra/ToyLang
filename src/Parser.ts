@@ -1,12 +1,12 @@
-import { tl } from "./typings";
 import { Token, Tokenizer, TokenTypes } from "./Tokenizer";
 import { ASTFactory, DefaultASTFactory } from "./ASTFactories";
 import { parseStatementList } from "./core/statement";
+import { ToyLangParserError } from "./ErrorReporter";
 
 export class Parser {
   _string: string;
   _tokenizer: Tokenizer;
-  _lookahead!: Token | null;
+  lookahead!: Token | null;
   factory: ASTFactory;
 
   constructor(astFactory: ASTFactory = DefaultASTFactory) {
@@ -20,7 +20,7 @@ export class Parser {
     this._tokenizer.init(string);
 
     // prime the tokenizer by obtaining the first token (predictive parsing)
-    this._lookahead = this._tokenizer.getNextToken();
+    this.lookahead = this._tokenizer.getNextToken();
 
     return this.Program();
   }
@@ -29,24 +29,79 @@ export class Parser {
     return this.factory.Program(parseStatementList(this));
   }
 
-  _eat(tokenType: keyof typeof TokenTypes) {
-    const token = this._lookahead;
+  /**
+   * Consumes the next token if it matches the specified token type.
+   * And advances the lookahead token.
+   *
+   * Returns the consumed token.
+   */
+  eat<T extends keyof typeof TokenTypes>(tokenType: T): Token & { type: T } {
+    const token = this.lookahead;
 
     if (token === null) {
-      throw new SyntaxError(
-        `Unexpected end of input, expected: "${tokenType}"`
-      );
+      throw new ToyLangParserError({
+        type: "UnexpectedEndOfInput",
+        message: [
+          `Unexpected end of input: expected: "${Tokenizer.tokenTypeToName(
+            tokenType
+          )}"`,
+        ],
+        code: this._string,
+        loc: {
+          start: this._string.length - 1,
+          end: this._string.length,
+        },
+      });
     }
 
     if (token.type !== tokenType) {
-      throw new SyntaxError(
-        `Unexpected token: "${token.value}", expected: "${tokenType}"`
-      );
+      throw new ToyLangParserError({
+        type: "UnexpectedToken",
+        message: [
+          `Unexpected token: "${Tokenizer.tokenTypeToName(
+            token.value
+          )}" expected: "${Tokenizer.tokenTypeToName(tokenType)}"`,
+        ],
+        code: this._string,
+        loc: {
+          start: token.start,
+          end: token.end,
+        },
+      });
     }
 
-    this._lookahead = this._tokenizer.getNextToken();
+    this.lookahead = this._tokenizer.getNextToken();
 
-    return token;
+    return token as Token & { type: T };
+  }
+
+  panic({
+    type,
+    expected,
+    message,
+  }: {
+    type: string;
+    expected?: string[];
+    message: ({
+      got,
+      expected,
+    }: {
+      got: string;
+      expected?: string;
+    }) => string[];
+  }) {
+    throw new ToyLangParserError({
+      type,
+      message: message({
+        got: Tokenizer.tokenTypeToName(this.lookahead?.type || ""),
+        expected: expected?.join(" | "),
+      }),
+      code: this._string,
+      loc: {
+        start: this.lookahead?.start!,
+        end: this.lookahead?.end!,
+      },
+    });
   }
 }
 

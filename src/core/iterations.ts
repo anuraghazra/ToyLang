@@ -1,3 +1,4 @@
+import { ToyLangParserError } from "../ErrorReporter";
 import { Parser } from "../Parser";
 import { TokenTypes } from "../Tokenizer";
 import { parseExpression } from "./expression";
@@ -5,7 +6,7 @@ import { parseStatement } from "./statement";
 import { parseVariableStatementInit } from "./variable";
 
 export function parseIterationStatement(parser: Parser) {
-  switch (parser._lookahead?.type) {
+  switch (parser.lookahead?.type) {
     case TokenTypes.while:
       return parseWhileStatement(parser);
     case TokenTypes.do:
@@ -13,17 +14,19 @@ export function parseIterationStatement(parser: Parser) {
     case TokenTypes.for:
       return parseForStatement(parser);
   }
-  throw new SyntaxError(
-    `invalid IterationStatement: ${parser._lookahead?.type}`
-  );
+
+  throw parser.panic({
+    type: "SyntaxError",
+    message: ({ got }) => [`invalid IterationStatement: ${got}`],
+  });
 }
 
 // `while` `(` expression `)` Statement
 export function parseWhileStatement(parser: Parser) {
-  parser._eat(TokenTypes.while);
-  parser._eat(TokenTypes.PAREN_START);
+  parser.eat(TokenTypes.while);
+  parser.eat(TokenTypes.PAREN_START);
   const test = parseExpression(parser);
-  parser._eat(TokenTypes.PAREN_END);
+  parser.eat(TokenTypes.PAREN_END);
   const body = parseStatement(parser);
 
   return parser.factory.WhileStatement(test, body);
@@ -31,39 +34,37 @@ export function parseWhileStatement(parser: Parser) {
 
 // `do` Statement `while` `(` expression `)`
 export function parseDoWhileStatement(parser: Parser) {
-  parser._eat(TokenTypes.do);
+  parser.eat(TokenTypes.do);
   const body = parseStatement(parser);
-  parser._eat(TokenTypes.while);
-  parser._eat(TokenTypes.PAREN_START);
+  parser.eat(TokenTypes.while);
+  parser.eat(TokenTypes.PAREN_START);
   const test = parseExpression(parser);
-  parser._eat(TokenTypes.PAREN_END);
-  parser._eat(TokenTypes.SEMI);
+  parser.eat(TokenTypes.PAREN_END);
+  parser.eat(TokenTypes.SEMI);
 
   return parser.factory.DoWhileStatement(test, body);
 }
 
 // for `(` Statement `;` Statement `;` Statement `)` Statement
 export function parseForStatement(parser: Parser) {
-  parser._eat(TokenTypes.for);
-  parser._eat(TokenTypes.PAREN_START);
+  parser.eat(TokenTypes.for);
+  parser.eat(TokenTypes.PAREN_START);
 
   const init =
-    parser._lookahead?.type !== TokenTypes.SEMI
+    parser.lookahead?.type !== TokenTypes.SEMI
       ? parseForStatementInit(parser)
       : null;
-  parser._eat(TokenTypes.SEMI);
+  parser.eat(TokenTypes.SEMI);
 
   const test =
-    parser._lookahead?.type !== TokenTypes.SEMI
-      ? parseExpression(parser)
-      : null;
-  parser._eat(TokenTypes.SEMI);
+    parser.lookahead?.type !== TokenTypes.SEMI ? parseExpression(parser) : null;
+  parser.eat(TokenTypes.SEMI);
 
   const update =
-    parser._lookahead?.type !== TokenTypes.PAREN_END
+    parser.lookahead?.type !== TokenTypes.PAREN_END
       ? parseExpression(parser)
       : null;
-  parser._eat(TokenTypes.PAREN_END);
+  parser.eat(TokenTypes.PAREN_END);
 
   const body = parseStatement(parser);
 
@@ -71,7 +72,7 @@ export function parseForStatement(parser: Parser) {
 }
 
 export function parseForStatementInit(parser: Parser) {
-  if (parser._lookahead?.type === TokenTypes.let) {
+  if (parser.lookahead?.type === TokenTypes.let) {
     return parseVariableStatementInit(parser);
   }
   return parseExpression(parser);

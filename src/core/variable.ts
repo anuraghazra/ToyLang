@@ -5,7 +5,7 @@ import { parseIdentifier } from "./identifiers";
 
 // let VariableDeclarationList
 export function parseVariableStatementInit(parser: Parser) {
-  parser._eat(TokenTypes.let);
+  parser.eat(TokenTypes.let);
   const declarations = parseVariableDeclarationList(parser);
   return parser.factory.VariableStatement(declarations);
 }
@@ -13,7 +13,7 @@ export function parseVariableStatementInit(parser: Parser) {
 // let VariableDeclarationList ';'
 export function parseVariableStatement(parser: Parser) {
   const varStatement = parseVariableStatementInit(parser);
-  parser._eat(TokenTypes.SEMI);
+  parser.eat(TokenTypes.SEMI);
   return varStatement;
 }
 
@@ -23,8 +23,8 @@ export function parseVariableDeclarationList(parser: Parser) {
   do {
     declarations.push(parseVariableDeclaration(parser));
   } while (
-    parser._lookahead?.type === TokenTypes.COMMA &&
-    parser._eat(TokenTypes.COMMA)
+    parser.lookahead?.type === TokenTypes.COMMA &&
+    parser.eat(TokenTypes.COMMA)
   );
 
   return declarations;
@@ -34,8 +34,8 @@ export function parseVariableDeclarationList(parser: Parser) {
 export function parseVariableDeclaration(parser: Parser) {
   const id = parseIdentifier(parser);
   const init =
-    parser._lookahead?.type !== TokenTypes.SEMI &&
-    parser._lookahead?.type !== TokenTypes.COMMA
+    parser.lookahead?.type !== TokenTypes.SEMI &&
+    parser.lookahead?.type !== TokenTypes.COMMA
       ? parseVariableInitializer(parser)
       : null;
 
@@ -44,7 +44,7 @@ export function parseVariableDeclaration(parser: Parser) {
 
 // SIMPLE_ASSIGNMENT AssignmentExpression
 export function parseVariableInitializer(parser: Parser) {
-  parser._eat(TokenTypes.SIMPLE_ASSIGNMENT);
+  parser.eat(TokenTypes.SIMPLE_ASSIGNMENT);
 
   return parseAssignmentExpression(parser);
 }

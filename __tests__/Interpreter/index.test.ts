@@ -1,4 +1,4 @@
-import { Interpreter } from "../../src/Interpreter";
+import { Interpreter } from "../../src/interpreter/Interpreter";
 import { Parser } from "../../src/Parser";
 
 const parser = new Parser();

@@ -5,12 +5,12 @@ import { parseBlockStatement } from "./statement";
 
 // `class` Identifier `extends` OptExtends: BlockStatement
 export function parseClassDeclaration(parser: Parser) {
-  parser._eat(TokenTypes.class);
+  parser.eat(TokenTypes.class);
 
   const id = parseIdentifier(parser);
 
   const superClass =
-    parser._lookahead?.type === TokenTypes.extends
+    parser.lookahead?.type === TokenTypes.extends
       ? parseClassExtends(parser)
       : null;
 
@@ -20,7 +20,7 @@ export function parseClassDeclaration(parser: Parser) {
 }
 
 export function parseClassExtends(parser: Parser) {
-  parser._eat(TokenTypes.extends);
+  parser.eat(TokenTypes.extends);
 
   return parseIdentifier(parser);
 }
